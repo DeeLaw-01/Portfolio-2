@@ -282,38 +282,6 @@ export default function ContactModal ({ isOpen, onClose }: ContactModalProps) {
                     )}
                   </button>
 
-                  {/* Debug Toast Buttons */}
-                  <div className='flex space-x-2 mt-4'>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        addToast({
-                          type: 'success',
-                          title: 'Message sent successfully!',
-                          message: "I'll get back to you within 24-48 hours.",
-                          duration: 6000
-                        })
-                      }
-                      className='flex-1 py-2 px-3 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg transition-colors duration-200'
-                    >
-                      Test Success Toast
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        addToast({
-                          type: 'error',
-                          title: 'Failed to send message',
-                          message: 'Please try again or contact me directly.',
-                          duration: 5000
-                        })
-                      }
-                      className='flex-1 py-2 px-3 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors duration-200'
-                    >
-                      Test Error Toast
-                    </button>
-                  </div>
-
                   {/* Keyboard shortcuts hint */}
                   <div className='text-[#dadada]/40 text-xs text-center mt-4 space-x-4'>
                     <span>
