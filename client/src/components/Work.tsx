@@ -23,28 +23,28 @@ export default function Work ({
 
   const projects = [
     {
-      name: 'MetaMaxPro',
+      name: 'FounderScale',
       hasImage: true,
-      imageUrl: MetaMaxPro,
-      projectUrl: 'https://metamaxpro.com'
+      imageUrl: FounderScale,
+      projectUrl: 'https://www.founderscale.ceo'
     },
     {
       name: 'Pantheon',
       hasImage: true,
       imageUrl: Pantheon,
-      projectUrl: 'https://pantheon.com'
-    },
-    {
-      name: 'FounderScale',
-      hasImage: true,
-      imageUrl: FounderScale,
-      projectUrl: 'https://founderscale.com'
+      projectUrl: 'https://pantheon-zeta.vercel.app'
     },
     {
       name: 'BillNow',
       hasImage: true,
       imageUrl: BillNow,
-      projectUrl: 'https://billnow.com'
+      projectUrl: 'https://www.billnow.ai'
+    },
+    {
+      name: 'MetaMaxPro',
+      hasImage: true,
+      imageUrl: MetaMaxPro,
+      projectUrl: 'https://metamaxpro.org'
     }
   ]
 
