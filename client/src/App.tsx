@@ -205,8 +205,11 @@ export default function App () {
                     {/* Real Image - Always visible */}
                     <img
                       src={DitherWaleed}
-                      alt='Waleed Ahmed'
+                      alt='Waleed Ahmed - Full Stack Developer & UI/UX Designer'
                       className='w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500 ease-out'
+                      loading='eager'
+                      fetchPriority='high'
+                      decoding='async'
                     />
                     {/* Hover overlay */}
                     <div className='absolute inset-0 bg-gradient-to-br from-[#7203a9]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>

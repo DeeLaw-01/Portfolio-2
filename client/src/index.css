@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital,wght@0,400;1,400&family=Gidugu&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital,wght@0,400;1,400&family=Gidugu&display=swap&text=Design%20Meets%20Efficiency%20Beautifully%20Coded');
 
 @tailwind base;
 @tailwind components;
@@ -60,8 +60,6 @@ body {
   animation: spin 8s linear infinite;
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -117,8 +115,6 @@ body {
     --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {

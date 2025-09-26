@@ -161,10 +161,12 @@ export default function Work ({
             >
               <img
                 src={project.imageUrl}
-                alt={project.name}
+                alt={`${project.name} - Project showcase`}
                 className={`w-full object-cover rounded-[20px] cursor-pointer ${
                   is4K ? 'h-[280px]' : 'h-[180px]'
                 }`}
+                loading='lazy'
+                decoding='async'
                 onClick={() => {
                   handleProjectClick(project.projectUrl)
                   handleUserInteraction()
