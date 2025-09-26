@@ -49,7 +49,8 @@ export default function VinylRecord ({
           <img
             src={albumArt}
             alt={`${albumTitle} by ${artist}`}
-            className='w-full h-full object-cover'
+            className='w-full h-full object-cover transition-all duration-500 ease-in-out'
+            key={albumArt} // Force re-render on album art change for smooth transition
           />
 
           {/* Center hole */}

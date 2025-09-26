@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { motion, useAnimation } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
 import { ArrowUp } from 'lucide-react'
 import Header from './components/Header'
 import Hero from './components/Hero'
@@ -14,6 +14,8 @@ export default function App () {
   const [showScrollToTop, setShowScrollToTop] = useState(false)
   const [isLargeScreen, setIsLargeScreen] = useState(false)
   const [is4K, setIs4K] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +27,7 @@ export default function App () {
       const height = window.innerHeight
       setIsLargeScreen(width >= 1536 && height >= 900)
       setIs4K(width >= 2560 && height >= 1440) // 4K and ultrawide displays
+      setIsMobile(width < 768) // Mobile breakpoint
     }
 
     handleResize() // Check initial size
@@ -36,6 +39,46 @@ export default function App () {
     }
   }, [])
 
+  // Intersection Observer for mobile animate-into-view
+  useEffect(() => {
+    if (!isMobile) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const cardId = entry.target.id
+            if (cardId) {
+              setVisibleCards(prev => new Set([...prev, cardId]))
+            }
+          }
+        })
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    )
+
+    // Observe all cards
+    const cardIds = [
+      'hero',
+      'profile',
+      'about',
+      'contact',
+      'projects',
+      'socials'
+    ]
+    cardIds.forEach(id => {
+      const element = document.getElementById(id)
+      if (element) {
+        observer.observe(element)
+      }
+    })
+
+    return () => observer.disconnect()
+  }, [isMobile])
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -43,11 +86,28 @@ export default function App () {
     })
   }
 
+  // Helper function to get animation props based on mobile and visibility
+  const getAnimationProps = (cardId: string, variants: any) => {
+    if (!isMobile) {
+      // Desktop: use normal framer-motion variants
+      return { variants }
+    } else {
+      // Mobile: use intersection observer based animation
+      const isVisible = visibleCards.has(cardId)
+      return {
+        initial: variants.hidden,
+        animate: isVisible ? variants.visible : variants.hidden,
+        variants: undefined // Don't use variants on mobile
+      }
+    }
+  }
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
+        delayChildren: 0.3, // Add initial delay so animations are visible
         staggerChildren: 0.2
       }
     }
@@ -157,6 +217,7 @@ export default function App () {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
+              delay: 0.1, // Small delay for header
               duration: 0.5,
               ease: [0.4, 0.0, 0.2, 1] as any
             }}
@@ -186,7 +247,8 @@ export default function App () {
                 {/* Hero Section */}
                 <motion.div
                   className='md:col-span-1'
-                  variants={cardVariants.hero}
+                  id='hero'
+                  {...getAnimationProps('hero', cardVariants.hero)}
                 >
                   <Hero isLargeScreen={isLargeScreen} is4K={is4K} />
                 </motion.div>
@@ -194,8 +256,8 @@ export default function App () {
                 {/* Profile Image */}
                 <motion.div
                   className='md:col-span-1'
-                  variants={cardVariants.profile}
                   id='profile'
+                  {...getAnimationProps('profile', cardVariants.profile)}
                 >
                   <div
                     className={`w-full bg-gray-700 rounded-[20px] overflow-hidden relative group cursor-pointer ${
@@ -224,12 +286,18 @@ export default function App () {
                 }`}
               >
                 {/* About Section */}
-                <motion.div variants={cardVariants.about} id='about'>
+                <motion.div
+                  id='about'
+                  {...getAnimationProps('about', cardVariants.about)}
+                >
                   <About isLargeScreen={isLargeScreen} is4K={is4K} />
                 </motion.div>
 
                 {/* Contact Section */}
-                <motion.div variants={cardVariants.contact} id='contact'>
+                <motion.div
+                  id='contact'
+                  {...getAnimationProps('contact', cardVariants.contact)}
+                >
                   <Contact isLargeScreen={isLargeScreen} is4K={is4K} />
                 </motion.div>
               </div>
@@ -241,18 +309,18 @@ export default function App () {
             >
               {/* Work Section */}
               <motion.div
-                variants={cardVariants.work}
                 id='projects'
                 className={isLargeScreen ? 'flex-1' : ''}
+                {...getAnimationProps('projects', cardVariants.work)}
               >
                 <Work isLargeScreen={isLargeScreen} is4K={is4K} />
               </motion.div>
 
               {/* Socials Section */}
               <motion.div
-                variants={cardVariants.socials}
                 className='mb-8 md:mb-0'
                 id='socials'
+                {...getAnimationProps('socials', cardVariants.socials)}
               >
                 <Socials />
               </motion.div>

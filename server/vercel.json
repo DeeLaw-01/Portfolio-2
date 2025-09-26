@@ -1,9 +1,16 @@
 {
-    "version": 2,
-    "name": "bidbazarpk",
-    "builds":[{
-        "src": "index.js",
-        "use": "@vercel/node"}],
-    "routes": [
-        { "src": "/(.*)", "dest": "/index.js" }]
+  "version": 2,
+  "name": "waleed-ahmed",
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.js"
+    }
+  ]
 }

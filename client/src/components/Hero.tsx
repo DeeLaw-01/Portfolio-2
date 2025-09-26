@@ -16,13 +16,23 @@ export default function Hero ({
   const [isCurrentlyPlaying, setIsCurrentlyPlaying] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Dynamic polling based on playing status
+  const startPolling = (isPlaying: boolean) => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+
+    const interval = isPlaying ? 10000 : 30000 // 10s when playing, 30s when not
+    intervalRef.current = setInterval(() => {
+      loadSpotifyData()
+    }, interval)
+  }
+
   useEffect(() => {
     loadSpotifyData()
 
-    // Set up polling every 30 seconds (30000ms)
-    intervalRef.current = setInterval(() => {
-      loadSpotifyData()
-    }, 30000)
+    // Start with 30 second polling initially
+    startPolling(false)
 
     // Cleanup interval on unmount
     return () => {
@@ -36,8 +46,13 @@ export default function Hero ({
     try {
       setIsLoading(true)
       const track = await spotifyService.getTrackToDisplay(forceRefresh)
+      const currentlyPlaying = spotifyService.getIsCurrentlyPlaying()
+
       setCurrentTrack(track)
-      setIsCurrentlyPlaying(spotifyService.getIsCurrentlyPlaying())
+      setIsCurrentlyPlaying(currentlyPlaying)
+
+      // Restart polling with new interval based on playing status
+      startPolling(currentlyPlaying)
     } catch (error) {
       console.error('Error loading Spotify data:', error)
     } finally {
@@ -124,7 +139,7 @@ export default function Hero ({
         <VinylRecord
           albumArt={
             currentTrack?.album?.images?.[0]?.url ||
-            'https://i.guim.co.uk/img/media/87929f76cb1cbd05350d5a7b8fe759857a2e7e78/388_698_3299_1979/master/3299.jpg?width=1300&dpr=2&s=none&crop=none'
+            'https://www.cranfield-colours.co.uk/wp-content/uploads/2022/01/cranfield-traditional-etching-ink-mid-black.jpg'
           }
           albumTitle={
             isLoading ? 'Loading...' : currentTrack?.name || 'No track playing'
