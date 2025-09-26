@@ -3,7 +3,15 @@ import { ArrowUpRight } from 'lucide-react'
 import BlobCursor from './BlobCursor'
 import ContactModal from './ContactModal'
 
-export default function Contact () {
+interface ContactProps {
+  isLargeScreen?: boolean
+  is4K?: boolean
+}
+
+export default function Contact ({
+  isLargeScreen = false,
+  is4K = false
+}: ContactProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -13,7 +21,9 @@ export default function Contact () {
 
   return (
     <div
-      className='relative w-full h-[235px] cursor-pointer group'
+      className={`relative w-full cursor-pointer group ${
+        isLargeScreen ? 'h-full min-h-[235px]' : 'h-[235px]'
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
@@ -52,21 +62,37 @@ export default function Contact () {
       <div className='absolute inset-0 p-5 flex flex-col justify-between pointer-events-none z-10'>
         {/* Top Section */}
         <div className='flex justify-between items-start'>
-          <p className='text-[13px] leading-[15px] text-[#dadada]'>
+          <p
+            className={`text-[#dadada] ${
+              is4K ? 'text-[18px] leading-[22px]' : 'text-[13px] leading-[15px]'
+            }`}
+          >
             Have some
             <br />
             questions?
           </p>
 
           {/* Arrow Icon */}
-          <div className='w-[32px] h-[32px] absolute top-4 right-4 group-hover:top-3 group-hover:right-3 flex items-center justify-center transition-all duration-300 ease-in-out'>
-            <ArrowUpRight className='w-8 h-8 text-[#dadada]' />
+          <div
+            className={`absolute group-hover:top-3 group-hover:right-3 flex items-center justify-center transition-all duration-300 ease-in-out ${
+              is4K
+                ? 'w-[48px] h-[48px] top-6 right-6'
+                : 'w-[32px] h-[32px] top-4 right-4'
+            }`}
+          >
+            <ArrowUpRight
+              className={`text-[#dadada] ${is4K ? 'w-12 h-12' : 'w-8 h-8'}`}
+            />
           </div>
         </div>
 
         {/* Bottom Section */}
         <div>
-          <h2 className='text-[46px] leading-[54px] text-[#dadada] font-normal'>
+          <h2
+            className={`text-[#dadada] font-normal ${
+              is4K ? 'text-[70px] leading-[80px]' : 'text-[46px] leading-[54px]'
+            }`}
+          >
             Contact me
           </h2>
         </div>

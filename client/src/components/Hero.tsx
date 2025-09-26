@@ -2,7 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import VinylRecord from './VinylRecord'
 import { spotifyService, type SpotifyTrack } from '../services/spotifyService'
 
-export default function Hero () {
+interface HeroProps {
+  isLargeScreen?: boolean
+  is4K?: boolean
+}
+
+export default function Hero ({
+  isLargeScreen = false,
+  is4K = false
+}: HeroProps) {
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isCurrentlyPlaying, setIsCurrentlyPlaying] = useState(false)
@@ -51,41 +59,72 @@ export default function Hero () {
   }
 
   return (
-    <div className='bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] p-5 h-[355px] flex flex-col justify-between group w-full relative overflow-hidden hover:bg-white/[0.12] transition-all duration-300'>
+    <div
+      className={`bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] flex flex-col justify-between group w-full relative overflow-hidden hover:bg-white/[0.12] transition-all duration-300 ${
+        isLargeScreen ? 'h-full min-h-[355px]' : 'h-[355px]'
+      } ${is4K ? 'p-8' : 'p-5'}`}
+    >
       {/* Subtle gradient overlay */}
       <div className='absolute inset-0 bg-gradient-to-br from-[#7203a9]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
 
       {/* Track Info - Clean and Minimal */}
       <div
-        className='absolute top-4 left-4 z-20 cursor-pointer hover:opacity-80 transition-opacity duration-200'
+        className={`absolute z-20 cursor-pointer hover:opacity-80 transition-opacity duration-200 group/spotify ${
+          is4K ? 'top-6 left-6' : 'top-4 left-4'
+        }`}
         onClick={handleTrackInfoClick}
         title='Click to refresh Spotify status'
       >
-        <div className='text-xs text-white mb-1 font-medium'>
+        <div
+          className={`text-white mb-1 font-medium ${
+            is4K ? 'text-base' : 'text-xs'
+          }`}
+        >
           {isLoading
-            ? '🎵 Loading...'
+            ? 'Loading...'
             : currentTrack
             ? isCurrentlyPlaying
-              ? '🎵 Currently Listening To'
-              : '⭐ Top This Week'
-            : '🎵 Spotify Status'}
+              ? 'Currently Listening To'
+              : 'Top This Week'
+            : 'Spotify Status'}
         </div>
-        <div className='font-medium text-white text-sm max-w-[200px] truncate'>
+        <div
+          className={`font-medium text-white truncate ${
+            is4K ? 'text-lg max-w-[300px]' : 'text-sm max-w-[200px]'
+          }`}
+        >
           {isLoading ? 'Loading...' : currentTrack?.name || 'Nothing playing'}
         </div>
-        <div className='text-[#dadada]/70 text-xs max-w-[200px] truncate'>
+        <div
+          className={`text-[#dadada]/70 truncate ${
+            is4K ? 'text-base max-w-[300px]' : 'text-xs max-w-[200px]'
+          }`}
+        >
           {isLoading
             ? 'Spotify'
             : currentTrack?.artists?.[0]?.name || 'Check your Spotify'}
         </div>
+
+        {/* KMB Credit - appears on hover */}
+        <div
+          className={`text-white/60 mt-1 opacity-0 group-hover/spotify:opacity-100 transition-opacity duration-300 ${
+            is4K ? 'text-xs' : 'text-[10px]'
+          }`}
+        >
+          Inspired by KMB
+        </div>
       </div>
 
       {/* Vinyl Record Background - Top Right */}
-      <div className='absolute -top-56 -right-56 z-0 opacity-90 group-hover:opacity-100 transition-opacity duration-300'>
+      <div
+        className={`absolute z-0 opacity-90 group-hover:opacity-100 transition-opacity duration-300 ${
+          is4K ? '-top-80 -right-80' : '-top-56 -right-56'
+        }`}
+      >
         <VinylRecord
           albumArt={
             currentTrack?.album?.images?.[0]?.url ||
-            'https://via.placeholder.com/200x200/7203a9/dadada?text=♪'
+            'https://i.guim.co.uk/img/media/87929f76cb1cbd05350d5a7b8fe759857a2e7e78/388_698_3299_1979/master/3299.jpg?width=1300&dpr=2&s=none&crop=none'
           }
           albumTitle={
             isLoading ? 'Loading...' : currentTrack?.name || 'No track playing'
@@ -97,6 +136,7 @@ export default function Hero () {
           }
           isCurrentlyPlaying={isCurrentlyPlaying}
           onClick={handleSpotifyClick}
+          is4K={is4K}
         />
       </div>
 
@@ -109,13 +149,29 @@ export default function Hero () {
             textAlign: 'left'
           }}
         >
-          <div className='text-3xl leading-[64px]  group-hover:text-white transition-colors duration-300 -mb-4'>
+          <div
+            className={`group-hover:text-white transition-colors duration-300 ${
+              is4K
+                ? 'text-5xl leading-[96px] -mb-6'
+                : 'text-3xl leading-[64px] -mb-4'
+            }`}
+          >
             Design Meets
           </div>
-          <div className='text-6xl leading-[64px] font-extralight italic group-hover:text-white transition-colors duration-300'>
+          <div
+            className={`font-extralight italic group-hover:text-white transition-colors duration-300 ${
+              is4K ? 'text-8xl leading-[96px]' : 'text-6xl leading-[64px]'
+            }`}
+          >
             Efficiency
           </div>
-          <div className='text-2xl ml-32 leading-[48px] font-bold mt-2 group-hover:text-white transition-colors duration-300'>
+          <div
+            className={`font-bold mt-2 group-hover:text-white transition-colors duration-300 ${
+              is4K
+                ? 'text-4xl ml-48 leading-[72px]'
+                : 'text-2xl ml-32 leading-[48px]'
+            }`}
+          >
             -Beautifully Coded.
           </div>
         </div>

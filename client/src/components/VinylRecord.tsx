@@ -7,6 +7,7 @@ interface VinylRecordProps {
   isPlaying?: boolean
   isCurrentlyPlaying?: boolean
   onClick?: () => void
+  is4K?: boolean
 }
 
 export default function VinylRecord ({
@@ -15,13 +16,16 @@ export default function VinylRecord ({
   artist = 'Your Music',
   isPlaying = false,
   isCurrentlyPlaying = false,
-  onClick
+  onClick,
+  is4K = false
 }: VinylRecordProps) {
   return (
     <div className='relative'>
       {/* Vinyl Record */}
       <div
-        className='relative w-[32rem] h-[32rem] cursor-pointer'
+        className={`relative cursor-pointer ${
+          is4K ? 'w-[48rem] h-[48rem]' : 'w-[32rem] h-[32rem]'
+        }`}
         style={{
           animation: 'spin 12s linear infinite'
         }}
@@ -37,7 +41,11 @@ export default function VinylRecord ({
         </div>
 
         {/* Album cover in center */}
-        <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full overflow-hidden shadow-xl'>
+        <div
+          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden shadow-xl ${
+            is4K ? 'w-72 h-72' : 'w-48 h-48'
+          }`}
+        >
           <img
             src={albumArt}
             alt={`${albumTitle} by ${artist}`}
@@ -45,8 +53,16 @@ export default function VinylRecord ({
           />
 
           {/* Center hole */}
-          <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#0e0e14] rounded-full shadow-inner'>
-            <div className='absolute inset-1 bg-[#2a0a3d] rounded-full'></div>
+          <div
+            className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#0e0e14] rounded-full shadow-inner ${
+              is4K ? 'w-12 h-12' : 'w-8 h-8'
+            }`}
+          >
+            <div
+              className={`absolute bg-[#2a0a3d] rounded-full ${
+                is4K ? 'inset-2' : 'inset-1'
+              }`}
+            ></div>
           </div>
         </div>
 

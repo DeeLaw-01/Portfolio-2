@@ -23,7 +23,7 @@ export default function Socials () {
   ]
 
   return (
-    <div className='bg-white/[0.08] rounded-[20px] p-4 h-[84px] flex items-center justify-center w-full group'>
+    <div className='bg-white/[0.08] rounded-[20px] p-4 h-[84px] flex items-center justify-center w-full group flex-shrink-0'>
       <div className='flex gap-8'>
         {socialLinks.map(social => {
           const IconComponent = social.icon

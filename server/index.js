@@ -244,8 +244,40 @@ app.get('/api/spotify/callback', async (req, res) => {
 })
 
 // Get Spotify tokens from environment variables
-const spotifyAccessToken = process.env.SPOTIFY_ACCESS_TOKEN
+let spotifyAccessToken = process.env.SPOTIFY_ACCESS_TOKEN
 const spotifyRefreshToken = process.env.SPOTIFY_REFRESH_TOKEN
+
+// Helper function to make authenticated Spotify requests with automatic token refresh
+async function makeSpotifyRequest (url, retryCount = 0) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${spotifyAccessToken}`
+      }
+    })
+
+    // If token expired (401), try to refresh it
+    if (response.status === 401 && retryCount === 0) {
+      console.log('Spotify token expired, attempting to refresh...')
+      const newToken = await refreshSpotifyToken()
+
+      if (newToken) {
+        spotifyAccessToken = newToken // Update the token in memory
+        console.log('Token refreshed successfully, retrying request...')
+        // Retry the request with the new token
+        return makeSpotifyRequest(url, retryCount + 1)
+      } else {
+        console.error('Failed to refresh Spotify token')
+        return { ok: false, status: 401, error: 'Token refresh failed' }
+      }
+    }
+
+    return response
+  } catch (error) {
+    console.error('Error making Spotify request:', error)
+    return { ok: false, status: 500, error: error.message }
+  }
+}
 
 // Route to get current Spotify track data
 app.get('/api/spotify/current-track', async (req, res) => {
@@ -258,13 +290,8 @@ app.get('/api/spotify/current-track', async (req, res) => {
 
   try {
     // Try to get currently playing track first
-    const currentlyPlayingResponse = await fetch(
-      'https://api.spotify.com/v1/me/player/currently-playing',
-      {
-        headers: {
-          Authorization: `Bearer ${spotifyAccessToken}`
-        }
-      }
+    const currentlyPlayingResponse = await makeSpotifyRequest(
+      'https://api.spotify.com/v1/me/player/currently-playing'
     )
 
     if (currentlyPlayingResponse.ok) {
@@ -285,16 +312,17 @@ app.get('/api/spotify/current-track', async (req, res) => {
           console.log('Error parsing currently playing response:', error)
         }
       }
+    } else if (currentlyPlayingResponse.status === 401) {
+      // If we still get 401 after refresh attempt, return error
+      return res.status(401).json({
+        success: false,
+        message: 'Spotify authentication failed'
+      })
     }
 
     // Fallback to top track if no currently playing
-    const topTracksResponse = await fetch(
-      'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=1',
-      {
-        headers: {
-          Authorization: `Bearer ${spotifyAccessToken}`
-        }
-      }
+    const topTracksResponse = await makeSpotifyRequest(
+      'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=1'
     )
 
     if (topTracksResponse.ok) {
@@ -310,6 +338,11 @@ app.get('/api/spotify/current-track', async (req, res) => {
       } catch (error) {
         console.log('Error parsing top tracks response:', error)
       }
+    } else if (topTracksResponse.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: 'Spotify authentication failed'
+      })
     } else {
       console.log(
         'Top tracks request failed:',

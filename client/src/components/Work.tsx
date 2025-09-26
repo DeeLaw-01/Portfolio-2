@@ -5,7 +5,15 @@ import Pantheon from '../assets/Pantheon.png'
 import FounderScale from '../assets/Founderscale.png'
 import BillNow from '../assets/Billnow.png'
 
-export default function Work () {
+interface WorkProps {
+  isLargeScreen?: boolean
+  is4K?: boolean
+}
+
+export default function Work ({
+  isLargeScreen = false,
+  is4K = false
+}: WorkProps) {
   const [hoveredProject, setHoveredProject] = useState<string | null>(
     'MetaMaxPro'
   )
@@ -97,7 +105,11 @@ export default function Work () {
   }, [isUserInteracting])
 
   return (
-    <div className='bg-white/[0.08] rounded-[20px] p-5 h-[506px] overflow-hidden w-full'>
+    <div
+      className={`bg-white/[0.08] rounded-[20px] overflow-hidden w-full ${
+        isLargeScreen ? 'h-full min-h-[506px] flex-1' : 'h-[506px]'
+      } ${is4K ? 'p-8' : 'p-5'}`}
+    >
       <div className='h-full flex flex-col'>
         {projects.map((project, index) => (
           <div
@@ -116,7 +128,9 @@ export default function Work () {
             {/* Project Header */}
             <div className='flex justify-between items-center mb-2 transition-all duration-300 ease-in-out'>
               <h3
-                className={`text-[25px] font-normal text-[#dadada] transition-all duration-300 ease-in-out ${
+                className={`font-normal text-[#dadada] transition-all duration-300 ease-in-out ${
+                  is4K ? 'text-[40px]' : 'text-[25px]'
+                } ${
                   hoveredProject === project.name
                     ? 'transform -translate-y-2'
                     : 'transform translate-y-0'
@@ -131,7 +145,9 @@ export default function Work () {
                     : 'transform translate-x-0 translate-y-0'
                 }`}
               >
-                <ArrowUpRight className='w-8 h-8 text-[#dadada]' />
+                <ArrowUpRight
+                  className={`text-[#dadada] ${is4K ? 'w-12 h-12' : 'w-8 h-8'}`}
+                />
               </div>
             </div>
 
@@ -146,7 +162,9 @@ export default function Work () {
               <img
                 src={project.imageUrl}
                 alt={project.name}
-                className='w-full h-[180px] object-cover rounded-[20px] cursor-pointer'
+                className={`w-full object-cover rounded-[20px] cursor-pointer ${
+                  is4K ? 'h-[280px]' : 'h-[180px]'
+                }`}
                 onClick={() => {
                   handleProjectClick(project.projectUrl)
                   handleUserInteraction()

@@ -2,11 +2,16 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 
-export default function Header () {
+interface HeaderProps {
+  is4K?: boolean
+}
+
+export default function Header ({ is4K = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 })
   const [modalMessage, setModalMessage] = useState('')
+  const [isDownloadingCV, setIsDownloadingCV] = useState(false)
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -41,6 +46,33 @@ export default function Header () {
     scrollToSection('profile', "yep that's me")
   }
 
+  const handleDownloadCV = async () => {
+    if (isDownloadingCV) return // Prevent multiple downloads
+
+    setIsDownloadingCV(true)
+
+    try {
+      // Simulate a small delay to show the loading state
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Create a link element and trigger download
+      const link = document.createElement('a')
+      link.href = '/cv/Waleed_Ahmed_CV.pdf' // You'll place your CV in public/cv/ folder
+      link.download = 'Waleed_Ahmed_CV.pdf'
+      link.target = '_blank'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Error downloading CV:', error)
+    } finally {
+      // Reset loading state after a short delay
+      setTimeout(() => {
+        setIsDownloadingCV(false)
+      }, 1000)
+    }
+  }
+
   const navLinks = [
     { href: '#about', label: 'ABOUT', sectionId: 'about' },
     { href: '#contact', label: 'CONTACT', sectionId: 'contact' },
@@ -49,27 +81,62 @@ export default function Header () {
   ]
 
   return (
-    <header className='bg-white/[0.08] rounded-[20px] px-5 py-5 md:static sticky top-4 z-40'>
+    <header
+      className={`bg-white/[0.08] rounded-[20px] md:static sticky top-4 z-40 ${
+        is4K ? 'px-8 py-8' : 'px-5 py-5'
+      }`}
+    >
       <nav className='flex justify-between items-center'>
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className='text-[21px] italic font-normal text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer'
+          className={`italic font-normal text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
+            is4K ? 'text-[32px]' : 'text-[21px]'
+          }`}
         >
           Waleed Ahmed
         </button>
 
         {/* Desktop Navigation Links */}
-        <div className='hidden md:flex gap-8'>
+        <div
+          className={`hidden md:flex items-center ${is4K ? 'gap-12' : 'gap-8'}`}
+        >
           {navLinks.map(link => (
             <button
               key={link.label}
               onClick={() => scrollToSection(link.sectionId)}
-              className='text-[14px] text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer'
+              className={`text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
+                is4K ? 'text-[20px]' : 'text-[14px]'
+              }`}
             >
               {link.label}
             </button>
           ))}
+
+          {/* Download CV Button */}
+          <button
+            onClick={handleDownloadCV}
+            disabled={isDownloadingCV}
+            className={`transition-all duration-200 rounded-lg font-medium flex items-center justify-center ${
+              isDownloadingCV
+                ? 'bg-[#7203a9]/50 cursor-not-allowed'
+                : 'bg-[#7203a9] hover:bg-[#8a1bb8] active:scale-95'
+            } ${
+              is4K
+                ? 'px-6 py-3 text-[18px] min-w-[140px]'
+                : 'px-4 py-2 text-[13px] min-w-[120px]'
+            }`}
+          >
+            {isDownloadingCV ? (
+              <div
+                className={`border-2 border-white/30 border-t-white rounded-full animate-spin ${
+                  is4K ? 'w-5 h-5' : 'w-4 h-4'
+                }`}
+              />
+            ) : (
+              <span>Download CV</span>
+            )}
+          </button>
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -130,6 +197,26 @@ export default function Header () {
                     {link.label}
                   </motion.button>
                 ))}
+
+                {/* Mobile Download CV Button */}
+                <motion.button
+                  onClick={handleDownloadCV}
+                  disabled={isDownloadingCV}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.1 }}
+                  className={`transition-all duration-200 rounded-lg font-medium px-4 py-3 text-[14px] text-left flex items-center justify-center min-w-[140px] ${
+                    isDownloadingCV
+                      ? 'bg-[#7203a9]/50 cursor-not-allowed'
+                      : 'bg-[#7203a9] hover:bg-[#8a1bb8] active:scale-95'
+                  }`}
+                >
+                  {isDownloadingCV ? (
+                    <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
+                  ) : (
+                    <span>Download CV</span>
+                  )}
+                </motion.button>
               </div>
             </motion.div>
           </>
