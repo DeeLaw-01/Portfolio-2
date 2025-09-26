@@ -1,4 +1,3 @@
-import circleIcon from '../assets/CIRCLE ICON.png'
 import FallingText from './FallingText'
 import CurvedLoop from './CurvedLoop'
 

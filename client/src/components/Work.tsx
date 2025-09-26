@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { ArrowUpRight } from 'lucide-react'
-import MetaMaxPro from '../assets/Metamaxpro.png'
-import Pantheon from '../assets/Pantheon.png'
-import FounderScale from '../assets/Founderscale.png'
-import BillNow from '../assets/Billnow.png'
+import MetaMaxPro from '../assets/Metamaxpro.webp'
+import Pantheon from '../assets/Pantheon.webp'
+import FounderScale from '../assets/Founderscale.webp'
+import BillNow from '../assets/Billnow.webp'
 
 interface WorkProps {
   isLargeScreen?: boolean
