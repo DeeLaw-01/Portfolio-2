@@ -17,10 +17,10 @@ app.use(
     credentials: true,
     origin: [
       'http://localhost:5173',
-      'http://localhost:4000',
-      'http://127.0.0.1:4000',
-      'https://hackathonstartertemplate.onrender.com',
-      'https://www.hackathonstartertemplate.onrender.com'
+      'https://waleed-ahmed-xep2.onrender.com',
+      'https://www.waleed-ahmed-xep2.onrender.com',
+      'https://iamwaleed.me',
+      'https://www.iamwaleed.me'
     ]
   })
 )
