@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Auth Test</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #1db954;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background-color: #1ed760;
+        }
+
+        .token-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎵 Spotify Authentication Test</h1>
+        <p>This page helps you test the Spotify authentication flow and get your access token.</p>
+
+        <button onclick="startAuth()">🔐 Start Spotify Authentication</button>
+        <button onclick="directAuth()">🚀 Direct Auth (Alternative)</button>
+        <button onclick="setTokenInBackend()" id="setTokenBtn" style="display: none;">💾 Set Token in Backend</button>
+        <button onclick="refreshSpotifyToken()" id="refreshBtn" style="display: none;">🔄 Refresh Token</button>
+
+        <div id="status"></div>
+        <div id="tokenDisplay" class="token-display" style="display: none;">
+            <h3>Your Spotify Tokens:</h3>
+            <p><strong>Access Token:</strong></p>
+            <p id="accessToken"></p>
+            <p><strong>Refresh Token:</strong></p>
+            <p id="refreshToken"></p>
+            <p><strong>Expires In:</strong> <span id="expiresIn"></span> seconds</p>
+            <p><strong>Token Type:</strong> <span id="tokenType"></span></p>
+        </div>
+    </div>
+
+    <script>
+        let currentTokens = null;
+
+        async function startAuth() {
+            try {
+                showStatus('Starting authentication...', 'success');
+                const response = await fetch('/api/spotify/login');
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('Redirecting to Spotify...', 'success');
+                    // Redirect to Spotify auth page
+                    window.location.href = data.authUrl;
+                } else {
+                    showStatus('Failed to start authentication: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        function directAuth() {
+            showStatus('Redirecting to Spotify...', 'success');
+            window.location.href = '/api/spotify/auth';
+        }
+
+        async function setTokenInBackend() {
+            if (!currentTokens || !currentTokens.access_token) {
+                showStatus('No token available to set', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/spotify/set-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        access_token: currentTokens.access_token,
+                        expires_in: currentTokens.expires_in
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('Token set in backend successfully! 🎵', 'success');
+                    document.getElementById('setTokenBtn').style.display = 'none';
+                } else {
+                    showStatus('Failed to set token: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('Error setting token: ' + error.message, 'error');
+            }
+        }
+
+        async function checkForToken() {
+            // This is a simplified approach - in a real app, you'd handle the callback properly
+            showStatus('Please check your server logs for the token, or use the callback URL directly.', 'success');
+        }
+
+        async function refreshSpotifyToken() {
+            if (!currentTokens || !currentTokens.refresh_token) {
+                showStatus('No refresh token available', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/spotify/refresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        refresh_token: currentTokens.refresh_token
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentTokens.access_token = data.access_token;
+                    currentTokens.expires_in = data.expires_in;
+                    currentTokens.token_type = data.token_type;
+                    displayTokens(currentTokens);
+                    showStatus('Token refreshed successfully!', 'success');
+                } else {
+                    showStatus('Failed to refresh token: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('Error refreshing token: ' + error.message, 'error');
+            }
+        }
+
+        function displayTokens(tokens) {
+            document.getElementById('accessToken').textContent = tokens.access_token;
+            document.getElementById('refreshToken').textContent = tokens.refresh_token || 'Not provided';
+            document.getElementById('expiresIn').textContent = tokens.expires_in;
+            document.getElementById('tokenType').textContent = tokens.token_type;
+            document.getElementById('tokenDisplay').style.display = 'block';
+            document.getElementById('refreshBtn').style.display = 'inline-block';
+            document.getElementById('setTokenBtn').style.display = 'inline-block';
+            currentTokens = tokens;
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        // Check if we have tokens in URL parameters (for callback testing)
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token');
+        const expiresIn = urlParams.get('expires_in');
+        const tokenType = urlParams.get('token_type');
+
+        if (accessToken) {
+            const tokens = {
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                expires_in: expiresIn,
+                token_type: tokenType
+            };
+            displayTokens(tokens);
+            showStatus('Authentication successful!', 'success');
+        }
+    </script>
+</body>
+
+</html>

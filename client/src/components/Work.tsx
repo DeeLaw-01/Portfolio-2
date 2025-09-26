@@ -97,7 +97,7 @@ export default function Work () {
   }, [isUserInteracting])
 
   return (
-    <div className='bg-white/[0.08] rounded-[20px] p-5 h-[506px] overflow-hidden'>
+    <div className='bg-white/[0.08] rounded-[20px] p-5 h-[506px] overflow-hidden w-full'>
       <div className='h-full flex flex-col'>
         {projects.map((project, index) => (
           <div

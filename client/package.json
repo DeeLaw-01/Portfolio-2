@@ -11,12 +11,22 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.22",
+    "gsap": "^3.13.0",
     "lucide-react": "^0.541.0",
+    "matter-js": "^0.20.0",
+    "motion": "^12.23.22",
+    "ogl": "^1.0.11",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@types/matter-js": "^0.20.2",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
