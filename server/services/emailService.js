@@ -165,8 +165,8 @@ export const sendContactConfirmation = async contactData => {
         
         <p>In the meantime, feel free to:</p>
         <ul>
-          <li>Check out my other projects on <a href="https://github.com/waleedahmed" style="color: #7203a9;">GitHub</a></li>
-          <li>Connect with me on <a href="https://linkedin.com/in/waleedahmed" style="color: #7203a9;">LinkedIn</a></li>
+          <li>Check out my other projects on <a href="https://github.com/DeeLaw-01" style="color: #7203a9;">GitHub</a></li>
+          <li>Connect with me on <a href="https://www.linkedin.com/in/waleed-ahmed-284392203/" style="color: #7203a9;">LinkedIn</a></li>
           <li>Explore more of my work on my portfolio</li>
         </ul>
         
