@@ -424,6 +424,7 @@ export default function AdminBlogEditor () {
             <div className='bg-white/[0.08] border border-white/[0.05] rounded-[20px] p-5'>
               <div className='flex items-center justify-between mb-3'>
                 <h3 className='text-sm font-medium text-white'>Tags</h3>
+                //@ts-ignore
                 <button
                   onClick={() => setShowNewTag(!showNewTag)}
                   className='text-[#7203a9] hover:text-[#8a1bb8] transition-colors'

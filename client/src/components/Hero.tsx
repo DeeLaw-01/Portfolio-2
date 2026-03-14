@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { GitCommit } from 'lucide-react'
 import GitHubActivity from './GitHubActivity'
 import { githubService, type GitHubCommit } from '../services/githubService'
 
@@ -19,7 +20,6 @@ export default function Hero ({
   useEffect(() => {
     loadGitHubData()
 
-    // Poll every 5 minutes
     intervalRef.current = setInterval(() => {
       loadGitHubData()
     }, 5 * 60 * 1000)
@@ -53,7 +53,26 @@ export default function Hero ({
       {/* Subtle gradient overlay */}
       <div className='absolute inset-0 bg-gradient-to-br from-[#7203a9]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
-      {/* GitHub Activity — fills the top portion */}
+      {/* Large GitCommit icon — positioned like the old vinyl record */}
+      <div
+        className='absolute -top-20 -translate-y-1/2 -right-24 pointer-events-none'
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
+          transform: 'rotate(90deg)'
+        }}
+      >
+        <GitCommit
+          className={`relative text-[#7203a9] ${
+            is4K ? 'w-[400px] h-[400px]' : 'w-[500px] h-[500px]'
+          }`}
+          strokeWidth={1}
+        />
+      </div>
+
+      {/* GitHub Activity — commit info top-left */}
       <div className='relative z-10 flex-1 min-h-0'>
         <GitHubActivity
           commits={commits}
