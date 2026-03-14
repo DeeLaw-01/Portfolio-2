@@ -23,8 +23,8 @@ export default function Socials () {
   ]
 
   return (
-    <div className='bg-white/[0.08] rounded-[20px] p-4 h-[84px] flex items-center justify-center w-full group flex-shrink-0'>
-      <div className='flex gap-8'>
+    <div className='bg-white/[0.08] rounded-[20px] p-4 h-[96px] flex items-center justify-center w-full group flex-shrink-0'>
+      <div className='flex gap-10'>
         {socialLinks.map(social => {
           const IconComponent = social.icon
           return (
@@ -35,8 +35,8 @@ export default function Socials () {
               rel='noopener noreferrer'
               className={`flex flex-col items-center gap-1 text-[#dadada] ${social.color} transition-all duration-300 cursor-pointer group-hover:scale-105`}
             >
-              <IconComponent className='w-5 h-5' />
-              <span className='text-[10px] font-medium'>{social.name}</span>
+              <IconComponent className='w-6 h-6' />
+              <span className='text-xs font-medium'>{social.name}</span>
             </a>
           )
         })}

@@ -24,7 +24,7 @@ export default function HomePage () {
     const handleResize = () => {
       const width = window.innerWidth
       const height = window.innerHeight
-      setIsLargeScreen(width >= 2200 && height >= 1100)
+      setIsLargeScreen(width >= 1024)
       setIs4K(width >= 2560 && height >= 1440)
       setIsMobile(width < 768)
     }
@@ -179,7 +179,7 @@ export default function HomePage () {
   return (
     <div
       className={`bg-gradient-to-br from-[#0e0e14] via-[#0e0e14] to-[#1a0b2e] text-[#dadada] relative ${
-        isLargeScreen ? 'h-screen overflow-hidden' : 'min-h-screen'
+        isLargeScreen ? 'h-screen overflow-y-auto' : 'min-h-screen'
       }`}
     >
       {/* Subtle background pattern */}
@@ -200,11 +200,11 @@ export default function HomePage () {
         className='absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-l from-[#7203a9]/5 to-transparent rounded-full blur-3xl animate-pulse'
         style={{ animationDelay: '2s' }}
       ></div>
-        <div
-          className={`h-full w-full max-w-[1600px] mx-auto px-4 lg:px-6 py-3 relative z-10 ${
-            isLargeScreen ? 'flex flex-col' : ''
-          }`}
-        >
+      <div
+        className={`h-full w-full mx-auto px-4 lg:px-6 py-3 relative z-10 ${
+          isLargeScreen ? 'flex flex-col' : ''
+        }`}
+      >
         {/* Header - Full width */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

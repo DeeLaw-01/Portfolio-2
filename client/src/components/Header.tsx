@@ -48,7 +48,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
 
   const handleLogoClick = () => {
     if (isHomePage) {
-      scrollToSection('profile', "yep that's me")
+    scrollToSection('profile', "yep that's me")
     } else {
       navigate('/')
     }
@@ -121,7 +121,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
         <button
           onClick={handleLogoClick}
           className={`italic font-normal text-[#dadada] hover:text-[#a855f7] transition-colors cursor-pointer ${
-            is4K ? 'text-[32px]' : 'text-[21px]'
+            is4K ? 'text-[32px]' : 'text-[26px]'
           }`}
         >
           Waleed Ahmed
@@ -136,7 +136,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
               key={link.label}
               onClick={() => handleNavClick(link.sectionId)}
               className={`text-[#dadada] hover:text-[#a855f7] transition-colors cursor-pointer ${
-                is4K ? 'text-[20px]' : 'text-[14px]'
+                is4K ? 'text-[20px]' : 'text-[16px]'
               }`}
             >
               {link.label}
@@ -164,7 +164,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
             } ${
               is4K
                 ? 'px-6 py-3 text-[18px] min-w-[140px]'
-                : 'px-4 py-2 text-[13px] min-w-[120px]'
+                : 'px-5 py-2.5 text-[15px] min-w-[130px]'
             }`}
           >
             {isDownloadingCV ? (

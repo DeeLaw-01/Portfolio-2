@@ -63,7 +63,7 @@ export default function About ({
             backgroundColor='transparent'
             wireframes={false}
             gravity={0.8}
-            fontSize='14px'
+            fontSize='17px'
             mouseConstraintStiffness={0.6}
           />
         </div>

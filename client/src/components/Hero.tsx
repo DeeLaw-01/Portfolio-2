@@ -46,34 +46,34 @@ export default function Hero ({
 
   return (
     <div
-      className={`bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] flex flex-col group w-full relative overflow-hidden hover:bg-white/[0.12] transition-all duration-300 ${
+      className={`bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] flex flex-col justify-between group w-full relative overflow-hidden hover:bg-white/[0.12] transition-all duration-300 ${
         isLargeScreen ? 'h-full min-h-[355px]' : 'h-[355px]'
-      } ${is4K ? 'p-8' : 'p-5'}`}
+      } ${is4K ? 'p-8' : 'p-6'}`}
     >
       {/* Subtle gradient overlay */}
       <div className='absolute inset-0 bg-gradient-to-br from-[#7203a9]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
-      {/* Large GitCommit icon — positioned like the old vinyl record */}
+      {/* Large GitCommit icon — spans full card height vertically */}
       <div
-        className='absolute -top-20 -translate-y-1/2 -right-24 pointer-events-none'
+        className='absolute top-1/2 -translate-y-1/2 -right-60 pointer-events-none md:block hidden'
         style={{
           maskImage:
-            'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
+            'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
           WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
-          transform: 'rotate(90deg)'
+            'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
+          transform: 'translateY(-50%) rotate(90deg)'
         }}
       >
         <GitCommit
-          className={` md:block hidden relative text-[#a855f7] ${
-            is4K ? 'w-[400px] h-[400px]' : 'w-[500px] h-[500px]'
+          className={`relative text-[#a855f7] ${
+            is4K ? 'w-[500px] h-[500px]' : 'w-[800px] h-[800px]'
           }`}
-          strokeWidth={1}
+          strokeWidth={0.8}
         />
       </div>
 
       {/* GitHub Activity — commit info top-left */}
-      <div className='relative z-10 flex-1 min-h-0'>
+      <div className='relative z-10 pt-10'>
         <GitHubActivity
           commits={commits}
           username={username}
@@ -83,32 +83,32 @@ export default function Hero ({
       </div>
 
       {/* Main Slogan — anchored to bottom */}
-      <div className='relative z-10 mt-auto pt-2'>
+      <div className='relative z-10 mt-auto'>
         <div
-          className='text-[#dadada]'
+          className='text-[#dadada] pb-12  pl-8'
           style={{ letterSpacing: '0px', textAlign: 'left' }}
         >
           <div
             className={`group-hover:text-white transition-colors duration-300 ${
               is4K
                 ? 'text-5xl leading-[96px] -mb-6'
-                : 'text-3xl leading-[64px] -mb-4'
+                : 'text-4xl leading-tight -mb-1'
             }`}
           >
             Design Meets
           </div>
           <div
             className={`font-extralight italic group-hover:text-white transition-colors duration-300 ${
-              is4K ? 'text-8xl leading-[96px]' : 'text-6xl leading-[64px]'
+              is4K ? 'text-8xl leading-[96px]' : 'text-8xl leading-tight'
             }`}
           >
             Efficiency
           </div>
           <div
-            className={`font-bold mt-2 group-hover:text-white transition-colors duration-300 ${
+            className={`font-bold mt-1 group-hover:text-white transition-colors duration-300 ${
               is4K
                 ? 'text-4xl ml-48 leading-[72px]'
-                : 'text-2xl ml-32 leading-[48px]'
+                : 'text-2xl ml-36 leading-tight'
             }`}
           >
             -Beautifully Coded.

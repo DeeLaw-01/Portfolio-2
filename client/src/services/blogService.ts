@@ -240,6 +240,17 @@ class BlogService {
     return res.json()
   }
 
+  // ==================== AI ====================
+
+  async refineBlogContent(content: string): Promise<{ success: boolean; refined?: string; message?: string }> {
+    const res = await fetch(`${API_URL}/api/ai/refine`, {
+      method: 'POST',
+      headers: authService.getAuthHeaders(),
+      body: JSON.stringify({ content })
+    })
+    return res.json()
+  }
+
   // ==================== TAGS ====================
 
   async getTags(): Promise<{ success: boolean; tags: Tag[] }> {

@@ -64,7 +64,7 @@ export default function Contact ({
         <div className='flex justify-between items-start'>
           <p
             className={`text-[#dadada] ${
-              is4K ? 'text-[18px] leading-[22px]' : 'text-[13px] leading-[15px]'
+              is4K ? 'text-[18px] leading-[22px]' : 'text-[16px] leading-[19px]'
             }`}
           >
             Have some
@@ -81,7 +81,7 @@ export default function Contact ({
             }`}
           >
             <ArrowUpRight
-              className={`text-[#dadada] ${is4K ? 'w-12 h-12' : 'w-8 h-8'}`}
+              className={`text-[#dadada] ${is4K ? 'w-12 h-12' : 'w-10 h-10'}`}
             />
           </div>
         </div>
@@ -90,7 +90,7 @@ export default function Contact ({
         <div>
           <h2
             className={`text-[#dadada] font-normal ${
-              is4K ? 'text-[70px] leading-[80px]' : 'text-[46px] leading-[54px]'
+              is4K ? 'text-[70px] leading-[80px]' : 'text-[56px] leading-[64px]'
             }`}
           >
             Contact me

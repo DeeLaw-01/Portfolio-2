@@ -129,7 +129,7 @@ export default function Work ({
             <div className='flex justify-between items-center mb-2 transition-all duration-300 ease-in-out'>
               <h3
                 className={`font-normal text-[#dadada] transition-all duration-300 ease-in-out ${
-                  is4K ? 'text-[40px]' : 'text-[25px]'
+                  is4K ? 'text-[40px]' : 'text-[30px]'
                 } ${
                   hoveredProject === project.name
                     ? 'transform -translate-y-2'
@@ -146,7 +146,7 @@ export default function Work ({
                 }`}
               >
                 <ArrowUpRight
-                  className={`text-[#dadada] ${is4K ? 'w-12 h-12' : 'w-8 h-8'}`}
+                  className={`text-[#dadada] ${is4K ? 'w-12 h-12' : 'w-10 h-10'}`}
                 />
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function Work ({
                 src={project.imageUrl}
                 alt={`${project.name} - Project showcase`}
                 className={`w-full object-cover rounded-[20px] cursor-pointer ${
-                  is4K ? 'h-[280px]' : 'h-[180px]'
+                  is4K ? 'h-[280px]' : 'h-[200px]'
                 }`}
                 loading='lazy'
                 decoding='async'

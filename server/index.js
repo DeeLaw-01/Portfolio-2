@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js'
 import blogRoutes from './routes/blogs.js'
 import tagRoutes from './routes/tags.js'
 import commentRoutes from './routes/comments.js'
+import aiRoutes from './routes/ai.js'
 
 dotenv.config()
 
@@ -56,6 +57,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/blogs', blogRoutes)
 app.use('/api/tags', tagRoutes)
 app.use('/api/comments', commentRoutes)
+app.use('/api/ai', aiRoutes)
 
 // Contact form route
 app.post('/api/contact', async (req, res) => {
@@ -135,7 +137,7 @@ app.get('/api/github/recent-activity', async (req, res) => {
     if (!reposResponse.ok) {
       if (reposResponse.status === 401) {
         return res.status(401).json({
-          success: false,
+        success: false,
           message: 'GitHub token invalid or expired'
         })
       }
