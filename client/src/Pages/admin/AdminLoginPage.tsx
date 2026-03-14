@@ -65,7 +65,7 @@ export default function AdminLoginPage () {
           {/* Back to blogs button - top left */}
           <button
             onClick={() => navigate('/blog')}
-            className='flex items-center gap-2 text-sm text-[#dadada]/50 hover:text-[#7203a9] transition-colors mb-6 group'
+            className='flex items-center gap-2 text-sm text-[#dadada]/50 hover:text-[#a855f7] transition-colors mb-6 group'
           >
             <ArrowLeft className='w-4 h-4 group-hover:-translate-x-1 transition-transform' />
             Back to blogs
@@ -73,7 +73,7 @@ export default function AdminLoginPage () {
 
           <div className='text-center mb-8'>
             <div className='w-16 h-16 bg-[#7203a9]/20 rounded-2xl flex items-center justify-center mx-auto mb-4'>
-              <Lock className='w-8 h-8 text-[#7203a9]' />
+              <Lock className='w-8 h-8 text-[#a855f7]' />
             </div>
             <h1 className='text-2xl font-bold text-white mb-1'>Welcome back</h1>
             <p className='text-sm text-[#dadada]/40'>

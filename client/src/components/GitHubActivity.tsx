@@ -35,7 +35,7 @@ export default function GitHubActivity ({
           {/* Label */}
           <div className='flex items-center gap-2 mb-3'>
             <Github
-              className={`text-[#7203a9] ${is4K ? 'w-5 h-5' : 'w-4 h-4'}`}
+              className={`text-[#a855f7] ${is4K ? 'w-5 h-5' : 'w-4 h-4'}`}
             />
             <span
               className={`text-[#dadada]/50 uppercase tracking-widest font-medium ${
@@ -76,7 +76,7 @@ export default function GitHubActivity ({
                   is4K ? 'text-sm' : 'text-xs'
                 }`}
               >
-                <span className='text-[#7203a9]/80 font-medium truncate'>
+                <span className='text-[#a855f7]/80 font-medium truncate'>
                   {latestCommit.repository?.name || 'repo'}
                 </span>
                 <span className='text-[#dadada]/20'>·</span>

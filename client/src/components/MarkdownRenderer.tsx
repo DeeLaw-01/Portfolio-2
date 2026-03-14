@@ -54,7 +54,7 @@ export default function MarkdownRenderer ({
               href={href}
               target='_blank'
               rel='noopener noreferrer'
-              className='text-[#7203a9] hover:text-[#8a1bb8] underline underline-offset-2 transition-colors'
+              className='text-[#a855f7] hover:text-[#c084fc] underline underline-offset-2 transition-colors'
             >
               {children}
             </a>
@@ -119,7 +119,7 @@ export default function MarkdownRenderer ({
 
           // Blockquote
           blockquote: ({ children }) => (
-            <blockquote className='border-l-4 border-[#7203a9] pl-4 my-4 text-[#dadada]/70 italic'>
+            <blockquote className='border-l-4 border-[#a855f7] pl-4 my-4 text-[#dadada]/70 italic'>
               {children}
             </blockquote>
           ),

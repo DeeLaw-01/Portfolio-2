@@ -188,7 +188,7 @@ export default function AdminBlogList () {
                     onClick={() =>
                       navigate(`/admin/blogs/edit/${blog._id}`)
                     }
-                    className='p-2 rounded-lg hover:bg-white/[0.1] text-[#dadada]/40 hover:text-[#7203a9] transition-colors'
+                    className='p-2 rounded-lg hover:bg-white/[0.1] text-[#dadada]/40 hover:text-[#a855f7] transition-colors'
                     title='Edit'
                   >
                     <Pencil className='w-4 h-4' />

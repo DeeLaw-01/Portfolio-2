@@ -65,7 +65,7 @@ export default function Hero ({
         }}
       >
         <GitCommit
-          className={`relative text-[#7203a9] ${
+          className={` md:block hidden relative text-[#a855f7] ${
             is4K ? 'w-[400px] h-[400px]' : 'w-[500px] h-[500px]'
           }`}
           strokeWidth={1}

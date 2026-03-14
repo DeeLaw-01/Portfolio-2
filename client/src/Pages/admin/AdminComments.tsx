@@ -13,7 +13,7 @@ import { formatDistanceToNow } from 'date-fns'
 import AdminLayout from '../../components/AdminLayout'
 import { blogService, type Comment } from '../../services/blogService'
 
-export default function AdminComments() {
+export default function AdminComments () {
   const [comments, setComments] = useState<Comment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -62,7 +62,10 @@ export default function AdminComments() {
   }
 
   return (
-    <AdminLayout title='Comments' subtitle={`${total} comment${total !== 1 ? 's' : ''} across all posts`}>
+    <AdminLayout
+      title='Comments'
+      subtitle={`${total} comment${total !== 1 ? 's' : ''} across all posts`}
+    >
       {isLoading ? (
         <div className='space-y-3'>
           {[1, 2, 3, 4, 5].map(i => (
@@ -97,7 +100,7 @@ export default function AdminComments() {
                     <div className='flex-1 min-w-0'>
                       {/* Header */}
                       <div className='flex items-center gap-3 mb-2'>
-                        <div className='w-8 h-8 rounded-full bg-[#7203a9]/30 flex items-center justify-center text-sm font-bold text-[#7203a9] shrink-0'>
+                        <div className='w-8 h-8 rounded-full bg-[#7203a9]/30 flex items-center justify-center text-sm font-bold text-[#a855f7] shrink-0'>
                           {(comment.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div className='min-w-0'>
@@ -115,9 +118,12 @@ export default function AdminComments() {
                           <div className='flex items-center gap-2 text-xs text-[#dadada]/30'>
                             {comment.createdAt && (
                               <span>
-                                {formatDistanceToNow(new Date(comment.createdAt), {
-                                  addSuffix: true
-                                })}
+                                {formatDistanceToNow(
+                                  new Date(comment.createdAt),
+                                  {
+                                    addSuffix: true
+                                  }
+                                )}
                               </span>
                             )}
                             {comment.blog && (
@@ -127,7 +133,7 @@ export default function AdminComments() {
                                   href={`/blog/${comment.blog.slug}`}
                                   target='_blank'
                                   rel='noopener noreferrer'
-                                  className='flex items-center gap-1 text-[#7203a9] hover:underline truncate'
+                                  className='flex items-center gap-1 text-[#a855f7] hover:underline truncate'
                                 >
                                   {comment.blog.title}
                                   <ExternalLink className='w-3 h-3 shrink-0' />

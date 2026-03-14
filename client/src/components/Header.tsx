@@ -120,7 +120,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className={`italic font-normal text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
+          className={`italic font-normal text-[#dadada] hover:text-[#a855f7] transition-colors cursor-pointer ${
             is4K ? 'text-[32px]' : 'text-[21px]'
           }`}
         >
@@ -135,7 +135,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
             <button
               key={link.label}
               onClick={() => handleNavClick(link.sectionId)}
-              className={`text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
+              className={`text-[#dadada] hover:text-[#a855f7] transition-colors cursor-pointer ${
                 is4K ? 'text-[20px]' : 'text-[14px]'
               }`}
             >
@@ -146,8 +146,8 @@ export default function Header ({ is4K = false }: HeaderProps) {
           {/* Blog Link */}
           <button
             onClick={() => navigate('/blog')}
-            className={`text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
-              location.pathname.startsWith('/blog') ? 'text-[#7203a9]' : ''
+            className={`text-[#dadada] hover:text-[#a855f7] transition-colors cursor-pointer ${
+              location.pathname.startsWith('/blog') ? 'text-[#a855f7]' : ''
             } ${is4K ? 'text-[20px]' : 'text-[14px]'}`}
           >
             BLOG
@@ -182,7 +182,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
         {/* Mobile Hamburger Button */}
         <button
           onClick={toggleMobileMenu}
-          className='md:hidden text-[#dadada] hover:text-[#7203a9] transition-colors p-2'
+          className='md:hidden text-[#dadada] hover:text-[#a855f7] transition-colors p-2'
           aria-label='Toggle mobile menu'
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -217,7 +217,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
                 </span>
                 <button
                   onClick={toggleMobileMenu}
-                  className='text-[#dadada] hover:text-[#7203a9] transition-colors p-2'
+                  className='text-[#dadada] hover:text-[#a855f7] transition-colors p-2'
                 >
                   <X size={20} />
                 </button>
@@ -235,7 +235,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className='text-[16px] text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer py-2 text-left'
+                    className='text-[16px] text-[#dadada] hover:text-[#a855f7] transition-colors cursor-pointer py-2 text-left'
                   >
                     {link.label}
                   </motion.button>
@@ -250,8 +250,8 @@ export default function Header ({ is4K = false }: HeaderProps) {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: navLinks.length * 0.1 }}
-                  className={`text-[16px] hover:text-[#7203a9] transition-colors cursor-pointer py-2 text-left ${
-                    location.pathname.startsWith('/blog') ? 'text-[#7203a9]' : 'text-[#dadada]'
+                  className={`text-[16px] hover:text-[#a855f7] transition-colors cursor-pointer py-2 text-left ${
+                    location.pathname.startsWith('/blog') ? 'text-[#a855f7]' : 'text-[#dadada]'
                   }`}
                 >
                   BLOG

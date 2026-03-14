@@ -201,7 +201,7 @@ export default function BlogPostPage() {
           </p>
           <button
             onClick={() => navigate('/blog')}
-            className='mt-4 text-[#7203a9] hover:text-[#8a1bb8] transition-colors'
+            className='mt-4 text-[#a855f7] hover:text-[#c084fc] transition-colors'
           >
             ← Back to blog
           </button>
@@ -215,7 +215,7 @@ export default function BlogPostPage() {
       {/* Back Button */}
       <button
         onClick={() => navigate('/blog')}
-        className='flex items-center gap-2 text-sm text-[#dadada]/50 hover:text-[#7203a9] transition-colors mb-6 group'
+        className='flex items-center gap-2 text-sm text-[#dadada]/50 hover:text-[#a855f7] transition-colors mb-6 group'
       >
         <ArrowLeft className='w-4 h-4 group-hover:-translate-x-1 transition-transform' />
         Back to all posts
@@ -245,7 +245,7 @@ export default function BlogPostPage() {
               <button
                 key={tag._id}
                 onClick={() => navigate(`/blog?tag=${tag.slug}`)}
-                className='flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border transition-colors hover:border-[#7203a9]/60'
+                className='flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border transition-colors hover:border-[#a855f7]/60'
                 style={{
                   borderColor: tag.color + '40',
                   color: tag.color,
@@ -296,8 +296,8 @@ export default function BlogPostPage() {
               onClick={handleLike}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all ${
                 liked
-                  ? 'bg-[#7203a9]/20 border-[#7203a9]/50 text-[#7203a9]'
-                  : 'bg-white/[0.05] border-white/[0.08] text-[#dadada]/60 hover:border-[#7203a9]/30 hover:text-[#dadada]'
+                  ? 'bg-[#7203a9]/20 border-[#a855f7]/50 text-[#a855f7]'
+                  : 'bg-white/[0.05] border-white/[0.08] text-[#dadada]/60 hover:border-[#a855f7]/30 hover:text-[#dadada]'
               }`}
               whileTap={{ scale: 0.95 }}
             >
@@ -310,7 +310,7 @@ export default function BlogPostPage() {
                 transition={{ duration: 0.3 }}
               >
                 <Heart
-                  className={`w-4 h-4 ${liked ? 'fill-[#7203a9]' : ''}`}
+                  className={`w-4 h-4 ${liked ? 'fill-[#a855f7]' : ''}`}
                 />
               </motion.div>
               {likeCount} {likeCount === 1 ? 'like' : 'likes'}
@@ -327,7 +327,7 @@ export default function BlogPostPage() {
         {/* Comments Section */}
         <div className='mt-12 pt-8 border-t border-white/[0.08]'>
           <h2 className='text-2xl font-bold text-white mb-6 flex items-center gap-2'>
-            <MessageCircle className='w-6 h-6 text-[#7203a9]' />
+            <MessageCircle className='w-6 h-6 text-[#a855f7]' />
             Comments ({comments.length})
           </h2>
 
@@ -345,14 +345,14 @@ export default function BlogPostPage() {
                   value={commentName}
                   onChange={e => setCommentName(e.target.value)}
                   maxLength={80}
-                  className='bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#7203a9]/50 transition-colors'
+                  className='bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#a855f7]/50 transition-colors'
                 />
                 <input
                   type='email'
                   placeholder='Email (hidden, pinky promise)'
                   value={commentEmail}
                   onChange={e => setCommentEmail(e.target.value)}
-                  className='bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#7203a9]/50 transition-colors'
+                  className='bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#a855f7]/50 transition-colors'
                 />
               </div>
 
@@ -372,7 +372,7 @@ export default function BlogPostPage() {
                 onChange={e => setCommentContent(e.target.value)}
                 maxLength={2000}
                 rows={4}
-                className='w-full bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#7203a9]/50 transition-colors resize-none'
+                className='w-full bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#a855f7]/50 transition-colors resize-none'
               />
 
               <div className='flex items-center justify-between'>
@@ -451,7 +451,7 @@ export default function BlogPostPage() {
                   <div className='flex items-center justify-between mb-2'>
                     <div className='flex items-center gap-2'>
                       {/* Gravatar-like avatar from name initial */}
-                      <div className='w-7 h-7 rounded-full bg-[#7203a9]/30 flex items-center justify-center text-xs font-bold text-[#7203a9]'>
+                      <div className='w-7 h-7 rounded-full bg-[#7203a9]/30 flex items-center justify-center text-xs font-bold text-[#a855f7]'>
                         {(comment.name || '?').charAt(0).toUpperCase()}
                       </div>
                       <span className='text-sm font-medium text-white'>

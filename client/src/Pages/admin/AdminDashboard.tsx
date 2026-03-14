@@ -119,7 +119,7 @@ export default function AdminDashboard () {
             {/* Top Posts */}
             <div className='bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] p-6'>
               <div className='flex items-center gap-2 mb-4'>
-                <TrendingUp className='w-4 h-4 text-[#7203a9]' />
+                <TrendingUp className='w-4 h-4 text-[#a855f7]' />
                 <h2 className='text-lg font-semibold text-white'>Top Posts</h2>
               </div>
               {stats?.topBlogs && stats.topBlogs.length > 0 ? (
@@ -143,7 +143,7 @@ export default function AdminDashboard () {
                           <Eye className='w-3 h-3' />
                           {blog.views}
                         </span>
-                        <ArrowUpRight className='w-3 h-3 text-[#7203a9] opacity-0 group-hover:opacity-100 transition-opacity' />
+                        <ArrowUpRight className='w-3 h-3 text-[#a855f7] opacity-0 group-hover:opacity-100 transition-opacity' />
                       </div>
                     </div>
                   ))}
@@ -158,7 +158,7 @@ export default function AdminDashboard () {
             {/* Recent Activity */}
             <div className='bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] p-6'>
               <div className='flex items-center gap-2 mb-4'>
-                <FileText className='w-4 h-4 text-[#7203a9]' />
+                <FileText className='w-4 h-4 text-[#a855f7]' />
                 <h2 className='text-lg font-semibold text-white'>
                   Recent Activity
                 </h2>

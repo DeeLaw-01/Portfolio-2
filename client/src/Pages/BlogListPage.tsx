@@ -248,7 +248,7 @@ export default function BlogListPage() {
                   return prev
                 })
               }}
-              className='w-full bg-white/[0.06] border border-white/[0.05] rounded-xl pl-9 pr-8 py-2 text-sm text-[#dadada] placeholder-[#dadada]/25 focus:outline-none focus:border-[#7203a9]/50 transition-colors'
+              className='w-full bg-white/[0.06] border border-white/[0.05] rounded-xl pl-9 pr-8 py-2 text-sm text-[#dadada] placeholder-[#dadada]/25 focus:outline-none focus:border-[#a855f7]/50 transition-colors'
             />
             {search && (
               <button
@@ -271,7 +271,7 @@ export default function BlogListPage() {
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs transition-all ${
               showFilters || dateFrom || dateTo
-                ? 'bg-[#7203a9]/20 border-[#7203a9]/50 text-[#7203a9]'
+                ? 'bg-[#7203a9]/20 border-[#a855f7]/50 text-[#a855f7]'
                 : 'bg-white/[0.06] border-white/[0.05] text-[#dadada]/50 hover:text-[#dadada]'
             }`}
           >
@@ -284,7 +284,7 @@ export default function BlogListPage() {
         {search.trim() && (
           <div className='flex items-center gap-1.5 text-xs text-[#dadada]/30'>
             {contentSearching && (
-              <Loader2 className='w-2.5 h-2.5 animate-spin text-[#7203a9]' />
+              <Loader2 className='w-2.5 h-2.5 animate-spin text-[#a855f7]' />
             )}
             <span>
               {totalResults} result{totalResults !== 1 ? 's' : ''}
@@ -320,7 +320,7 @@ export default function BlogListPage() {
                           return prev
                         })
                       }}
-                      className='w-full bg-white/[0.06] border border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-[#dadada] focus:outline-none focus:border-[#7203a9]/50 transition-colors [color-scheme:dark]'
+                      className='w-full bg-white/[0.06] border border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-[#dadada] focus:outline-none focus:border-[#a855f7]/50 transition-colors [color-scheme:dark]'
                     />
                   </div>
                   <div>
@@ -339,7 +339,7 @@ export default function BlogListPage() {
                           return prev
                         })
                       }}
-                      className='w-full bg-white/[0.06] border border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-[#dadada] focus:outline-none focus:border-[#7203a9]/50 transition-colors [color-scheme:dark]'
+                      className='w-full bg-white/[0.06] border border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-[#dadada] focus:outline-none focus:border-[#a855f7]/50 transition-colors [color-scheme:dark]'
                     />
                   </div>
                 </div>
@@ -357,8 +357,8 @@ export default function BlogListPage() {
                 onClick={() => handleTagClick(tag.slug)}
                 className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-all duration-200 border ${
                   activeTag === tag.slug
-                    ? 'bg-[#7203a9] border-[#7203a9] text-white'
-                    : 'bg-white/[0.04] border-white/[0.08] text-[#dadada]/60 hover:border-[#7203a9]/40 hover:text-[#dadada]'
+                    ? 'bg-[#7203a9] border-[#a855f7] text-white'
+                    : 'bg-white/[0.04] border-white/[0.08] text-[#dadada]/60 hover:border-[#a855f7]/40 hover:text-[#dadada]'
                 }`}
               >
                 <Tag className='w-2.5 h-2.5 inline mr-1' />
@@ -399,7 +399,7 @@ export default function BlogListPage() {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className='mt-3 text-xs text-[#7203a9] hover:text-[#8a1bb8] transition-colors'
+              className='mt-3 text-xs text-[#a855f7] hover:text-[#c084fc] transition-colors'
             >
               Clear filters
             </button>
@@ -456,7 +456,7 @@ export default function BlogListPage() {
                       </div>
                     )}
 
-                    <h2 className='text-sm font-semibold text-white mb-1.5 group-hover:text-[#7203a9] transition-colors line-clamp-2 leading-snug'>
+                    <h2 className='text-sm font-semibold text-white mb-1.5 group-hover:text-[#a855f7] transition-colors line-clamp-2 leading-snug'>
                       {blog.title}
                     </h2>
                     <p className='text-[11px] text-[#dadada]/50 mb-2.5 line-clamp-2 leading-relaxed'>
@@ -484,7 +484,7 @@ export default function BlogListPage() {
                           {blog.commentsCount}
                         </span>
                       </div>
-                      <ArrowRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform text-[#7203a9] opacity-0 group-hover:opacity-100' />
+                      <ArrowRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform text-[#a855f7] opacity-0 group-hover:opacity-100' />
                     </div>
                   </div>
                 </motion.article>

@@ -80,7 +80,7 @@ export default function AdminLayout ({
           <div className='p-6 border-b border-white/[0.05]'>
             <button
               onClick={() => navigate('/')}
-              className='text-lg italic text-[#dadada] hover:text-[#7203a9] transition-colors'
+              className='text-lg italic text-[#dadada] hover:text-[#a855f7] transition-colors'
             >
               Waleed Ahmed
             </button>
@@ -102,7 +102,7 @@ export default function AdminLayout ({
                   onClick={() => navigate(item.path)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                     isActive
-                      ? 'bg-[#7203a9]/20 text-[#7203a9] font-medium'
+                      ? 'bg-[#7203a9]/20 text-[#a855f7] font-medium'
                       : 'text-[#dadada]/60 hover:bg-white/[0.06] hover:text-[#dadada]'
                   }`}
                 >

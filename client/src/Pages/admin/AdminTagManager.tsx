@@ -254,7 +254,7 @@ export default function AdminTagManager () {
                   <div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
                     <button
                       onClick={() => startEditing(tag)}
-                      className='p-1.5 rounded-lg hover:bg-white/[0.1] text-[#dadada]/40 hover:text-[#7203a9] transition-colors'
+                      className='p-1.5 rounded-lg hover:bg-white/[0.1] text-[#dadada]/40 hover:text-[#a855f7] transition-colors'
                     >
                       <Pencil className='w-3.5 h-3.5' />
                     </button>

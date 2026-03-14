@@ -208,7 +208,7 @@ export default function AdminBlogEditor () {
     return (
       <AdminLayout title='Loading...' subtitle='Fetching your masterpiece...'>
         <div className='flex items-center justify-center py-20'>
-          <Loader2 className='w-6 h-6 text-[#7203a9] animate-spin' />
+          <Loader2 className='w-6 h-6 text-[#a855f7] animate-spin' />
         </div>
       </AdminLayout>
     )
@@ -297,7 +297,7 @@ export default function AdminBlogEditor () {
               onChange={e => setExcerpt(e.target.value)}
               maxLength={300}
               rows={2}
-              className='w-full bg-white/[0.04] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-[#dadada] placeholder-[#dadada]/20 focus:outline-none focus:border-[#7203a9]/30 resize-none'
+              className='w-full bg-white/[0.04] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-[#dadada] placeholder-[#dadada]/20 focus:outline-none focus:border-[#a855f7]/30 resize-none'
             />
 
             {/* Content Editor / Preview */}
@@ -322,7 +322,7 @@ export default function AdminBlogEditor () {
                   placeholder='Write your post in Markdown...'
                   value={content}
                   onChange={e => setContent(e.target.value)}
-                  className='w-full bg-white/[0.04] border border-white/[0.05] rounded-[20px] px-5 py-4 text-sm text-[#dadada] placeholder-[#dadada]/20 focus:outline-none focus:border-[#7203a9]/30 resize-none font-mono leading-relaxed min-h-[500px]'
+                  className='w-full bg-white/[0.04] border border-white/[0.05] rounded-[20px] px-5 py-4 text-sm text-[#dadada] placeholder-[#dadada]/20 focus:outline-none focus:border-[#a855f7]/30 resize-none font-mono leading-relaxed min-h-[500px]'
                   style={{ tabSize: 2 }}
                   onKeyDown={e => {
                     // Handle Tab key for indentation
@@ -344,7 +344,7 @@ export default function AdminBlogEditor () {
                 />
                 {isUploading && (
                   <div className='absolute inset-0 bg-black/50 rounded-[20px] flex items-center justify-center'>
-                    <div className='flex items-center gap-2 text-[#7203a9]'>
+                    <div className='flex items-center gap-2 text-[#a855f7]'>
                       <Loader2 className='w-5 h-5 animate-spin' />
                       <span className='text-sm'>Uploading image...</span>
                     </div>
@@ -401,7 +401,7 @@ export default function AdminBlogEditor () {
                   </button>
                 </div>
               ) : (
-                <label className='flex flex-col items-center justify-center h-36 border-2 border-dashed border-white/[0.1] rounded-xl cursor-pointer hover:border-[#7203a9]/40 transition-colors'>
+                <label className='flex flex-col items-center justify-center h-36 border-2 border-dashed border-white/[0.1] rounded-xl cursor-pointer hover:border-[#a855f7]/40 transition-colors'>
                   <ImageIcon className='w-8 h-8 text-[#dadada]/20 mb-2' />
                   <span className='text-xs text-[#dadada]/30'>
                     Click to upload
@@ -424,10 +424,9 @@ export default function AdminBlogEditor () {
             <div className='bg-white/[0.08] border border-white/[0.05] rounded-[20px] p-5'>
               <div className='flex items-center justify-between mb-3'>
                 <h3 className='text-sm font-medium text-white'>Tags</h3>
-                //@ts-ignore
                 <button
                   onClick={() => setShowNewTag(!showNewTag)}
-                  className='text-[#7203a9] hover:text-[#8a1bb8] transition-colors'
+                  className='text-[#a855f7] hover:text-[#c084fc] transition-colors'
                 >
                   <Plus className='w-4 h-4' />
                 </button>
@@ -441,7 +440,7 @@ export default function AdminBlogEditor () {
                     value={newTagName}
                     onChange={e => setNewTagName(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleCreateTag()}
-                    className='flex-1 bg-white/[0.06] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#7203a9]/50'
+                    className='flex-1 bg-white/[0.06] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-[#dadada] placeholder-[#dadada]/30 focus:outline-none focus:border-[#a855f7]/50'
                   />
                   <button
                     onClick={handleCreateTag}
@@ -459,7 +458,7 @@ export default function AdminBlogEditor () {
                     onClick={() => toggleTag(tag._id)}
                     className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all border ${
                       selectedTags.includes(tag._id)
-                        ? 'border-[#7203a9] bg-[#7203a9]/20 text-[#7203a9]'
+                        ? 'border-[#a855f7] bg-[#7203a9]/20 text-[#a855f7]'
                         : 'border-white/[0.08] text-[#dadada]/50 hover:border-white/[0.15]'
                     }`}
                   >
