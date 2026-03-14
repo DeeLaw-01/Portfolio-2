@@ -1,17 +1,21 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 interface HeaderProps {
   is4K?: boolean
 }
 
 export default function Header ({ is4K = false }: HeaderProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 })
   const [modalMessage, setModalMessage] = useState('')
   const [isDownloadingCV, setIsDownloadingCV] = useState(false)
+  const isHomePage = location.pathname === '/'
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -43,7 +47,11 @@ export default function Header ({ is4K = false }: HeaderProps) {
   }
 
   const handleLogoClick = () => {
-    scrollToSection('profile', "yep that's me")
+    if (isHomePage) {
+      scrollToSection('profile', "yep that's me")
+    } else {
+      navigate('/')
+    }
   }
 
   const handleDownloadCV = async () => {
@@ -73,12 +81,34 @@ export default function Header ({ is4K = false }: HeaderProps) {
     }
   }
 
-  const navLinks = [
+  const homeNavLinks = [
     { href: '#about', label: 'ABOUT', sectionId: 'about' },
     { href: '#contact', label: 'CONTACT', sectionId: 'contact' },
     { href: '#projects', label: 'PROJECTS', sectionId: 'projects' },
     { href: '#socials', label: 'SOCIALS', sectionId: 'socials' }
   ]
+
+  const navLinks = homeNavLinks
+
+  const handleNavClick = (sectionId: string) => {
+    if (isHomePage) {
+      scrollToSection(sectionId)
+    } else {
+      // Navigate to home with hash, then scroll after page loads
+      navigate(`/#${sectionId}`)
+      // Also try scrolling after a delay in case hash navigation doesn't work
+      setTimeout(() => {
+        const element = document.getElementById(sectionId)
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          })
+        }
+      }, 300)
+    }
+  }
 
   return (
     <header
@@ -104,7 +134,7 @@ export default function Header ({ is4K = false }: HeaderProps) {
           {navLinks.map(link => (
             <button
               key={link.label}
-              onClick={() => scrollToSection(link.sectionId)}
+              onClick={() => handleNavClick(link.sectionId)}
               className={`text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
                 is4K ? 'text-[20px]' : 'text-[14px]'
               }`}
@@ -112,6 +142,16 @@ export default function Header ({ is4K = false }: HeaderProps) {
               {link.label}
             </button>
           ))}
+
+          {/* Blog Link */}
+          <button
+            onClick={() => navigate('/blog')}
+            className={`text-[#dadada] hover:text-[#7203a9] transition-colors cursor-pointer ${
+              location.pathname.startsWith('/blog') ? 'text-[#7203a9]' : ''
+            } ${is4K ? 'text-[20px]' : 'text-[14px]'}`}
+          >
+            BLOG
+          </button>
 
           {/* Download CV Button */}
           <button
@@ -188,7 +228,10 @@ export default function Header ({ is4K = false }: HeaderProps) {
                 {navLinks.map((link, index) => (
                   <motion.button
                     key={link.label}
-                    onClick={() => scrollToSection(link.sectionId)}
+                    onClick={() => {
+                      handleNavClick(link.sectionId)
+                      setIsMobileMenuOpen(false)
+                    }}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -197,6 +240,22 @@ export default function Header ({ is4K = false }: HeaderProps) {
                     {link.label}
                   </motion.button>
                 ))}
+
+                {/* Blog Link - Mobile */}
+                <motion.button
+                  onClick={() => {
+                    navigate('/blog')
+                    setIsMobileMenuOpen(false)
+                  }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.1 }}
+                  className={`text-[16px] hover:text-[#7203a9] transition-colors cursor-pointer py-2 text-left ${
+                    location.pathname.startsWith('/blog') ? 'text-[#7203a9]' : 'text-[#dadada]'
+                  }`}
+                >
+                  BLOG
+                </motion.button>
 
                 {/* Mobile Download CV Button */}
                 <motion.button

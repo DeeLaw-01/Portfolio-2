@@ -7,6 +7,10 @@ import {
   sendContactEmail,
   sendContactConfirmation
 } from './services/emailService.js'
+import authRoutes from './routes/auth.js'
+import blogRoutes from './routes/blogs.js'
+import tagRoutes from './routes/tags.js'
+import commentRoutes from './routes/comments.js'
 
 dotenv.config()
 
@@ -52,6 +56,12 @@ app.get('/', (_, res) => {
 app.get('/spotify-test', (_, res) => {
   res.sendFile('spotify-test.html', { root: '.' })
 })
+
+// Blog & Auth routes
+app.use('/api/auth', authRoutes)
+app.use('/api/blogs', blogRoutes)
+app.use('/api/tags', tagRoutes)
+app.use('/api/comments', commentRoutes)
 
 // Contact form route
 app.post('/api/contact', async (req, res) => {
@@ -119,7 +129,7 @@ app.get('/api/spotify/login', (req, res) => {
 
   const state = generateRandomString(16)
   const scope =
-    'user-read-private user-read-email user-top-read user-read-currently-playing'
+    'user-read-private user-read-email user-read-currently-playing user-read-recently-played user-top-read'
 
   // Store state in session or memory (in production, use Redis or database)
   req.session = req.session || {}
@@ -154,7 +164,7 @@ app.get('/api/spotify/auth', (req, res) => {
 
   const state = generateRandomString(16)
   const scope =
-    'user-read-private user-read-email user-top-read user-read-currently-playing'
+    'user-read-private user-read-email user-read-currently-playing user-read-recently-played user-top-read'
 
   const authUrl =
     'https://accounts.spotify.com/authorize?' +
@@ -295,9 +305,11 @@ app.get('/api/spotify/current-track', async (req, res) => {
     )
 
     if (currentlyPlayingResponse.ok) {
-      // Check if response has content (204 means no content)
+      // Check if response has content (204 means no content - nothing playing)
       if (currentlyPlayingResponse.status === 204) {
-        console.log('No currently playing track')
+        console.log('No currently playing track (204 response)')
+        // Try fallback to recently played tracks
+        return tryRecentlyPlayedFallback(res)
       } else {
         try {
           const currentlyPlaying = await currentlyPlayingResponse.json()
@@ -310,6 +322,8 @@ app.get('/api/spotify/current-track', async (req, res) => {
           }
         } catch (error) {
           console.log('Error parsing currently playing response:', error)
+          // Try fallback
+          return tryRecentlyPlayedFallback(res)
         }
       }
     } else if (currentlyPlayingResponse.status === 401) {
@@ -318,9 +332,61 @@ app.get('/api/spotify/current-track', async (req, res) => {
         success: false,
         message: 'Spotify authentication failed'
       })
+    } else if (currentlyPlayingResponse.status === 403) {
+      console.log('Currently playing endpoint returned 403 - access restricted')
+      // Try fallback
+      return tryRecentlyPlayedFallback(res)
+    } else {
+      console.log(
+        'Currently playing request failed:',
+        currentlyPlayingResponse.status,
+        currentlyPlayingResponse.statusText
+      )
+      // Try fallback
+      return tryRecentlyPlayedFallback(res)
+    }
+  } catch (error) {
+    console.error('Error fetching Spotify data:', error)
+    // Try fallback before giving up
+    return tryRecentlyPlayedFallback(res)
+  }
+})
+
+// Helper function to try fallback endpoints
+async function tryRecentlyPlayedFallback (res) {
+  try {
+    // Try recently played tracks (this endpoint is usually more accessible)
+    const recentlyPlayedResponse = await makeSpotifyRequest(
+      'https://api.spotify.com/v1/me/player/recently-played?limit=1'
+    )
+
+    if (recentlyPlayedResponse.ok) {
+      try {
+        const recentlyPlayed = await recentlyPlayedResponse.json()
+        if (recentlyPlayed.items && recentlyPlayed.items.length > 0) {
+          return res.json({
+            success: true,
+            track: recentlyPlayed.items[0].track,
+            isCurrentlyPlaying: false,
+            message: 'Showing recently played track'
+          })
+        }
+      } catch (error) {
+        console.log('Error parsing recently played response:', error)
+      }
+    } else if (recentlyPlayedResponse.status === 403) {
+      console.log(
+        'Recently played endpoint also returned 403 - access restricted'
+      )
+    } else {
+      console.log(
+        'Recently played request failed:',
+        recentlyPlayedResponse.status,
+        recentlyPlayedResponse.statusText
+      )
     }
 
-    // Fallback to top track if no currently playing
+    // Last resort: Try top tracks (may fail with 403 for new apps)
     const topTracksResponse = await makeSpotifyRequest(
       'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=1'
     )
@@ -332,16 +398,23 @@ app.get('/api/spotify/current-track', async (req, res) => {
           return res.json({
             success: true,
             track: topTracks.items[0],
-            isCurrentlyPlaying: false
+            isCurrentlyPlaying: false,
+            message: 'Showing top track'
           })
         }
       } catch (error) {
         console.log('Error parsing top tracks response:', error)
       }
-    } else if (topTracksResponse.status === 401) {
-      return res.status(401).json({
+    } else if (topTracksResponse.status === 403) {
+      console.log(
+        'Top tracks endpoint returned 403 - access restricted (requires extended access)'
+      )
+      // Return a helpful message
+      return res.json({
         success: false,
-        message: 'Spotify authentication failed'
+        track: null,
+        message:
+          'Spotify API access restricted. Top tracks endpoint requires extended access (250+ monthly active users).'
       })
     } else {
       console.log(
@@ -351,20 +424,22 @@ app.get('/api/spotify/current-track', async (req, res) => {
       )
     }
 
-    // No track data available
-    res.json({
+    // No track data available from any endpoint
+    return res.json({
       success: true,
       track: null,
-      message: 'No track data available'
+      message:
+        'No track data available. Make sure Spotify is playing or try again later.'
     })
   } catch (error) {
-    console.error('Error fetching Spotify data:', error)
-    res.status(500).json({
+    console.error('Error in fallback:', error)
+    return res.json({
       success: false,
+      track: null,
       message: 'Error fetching Spotify data'
     })
   }
-})
+}
 
 // Function to refresh Spotify token
 async function refreshSpotifyToken () {
