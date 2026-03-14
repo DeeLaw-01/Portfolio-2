@@ -452,17 +452,19 @@ export default function BlogPostPage() {
                     <div className='flex items-center gap-2'>
                       {/* Gravatar-like avatar from name initial */}
                       <div className='w-7 h-7 rounded-full bg-[#7203a9]/30 flex items-center justify-center text-xs font-bold text-[#7203a9]'>
-                        {comment.name.charAt(0).toUpperCase()}
+                        {(comment.name || '?').charAt(0).toUpperCase()}
                       </div>
                       <span className='text-sm font-medium text-white'>
-                        {comment.name}
+                        {comment.name || 'Anonymous'}
                       </span>
                     </div>
-                    <span className='text-xs text-[#dadada]/30'>
-                      {formatDistanceToNow(new Date(comment.createdAt), {
-                        addSuffix: true
-                      })}
-                    </span>
+                    {comment.createdAt && (
+                      <span className='text-xs text-[#dadada]/30'>
+                        {formatDistanceToNow(new Date(comment.createdAt), {
+                          addSuffix: true
+                        })}
+                      </span>
+                    )}
                   </div>
                   <p className='text-sm text-[#dadada]/80 whitespace-pre-wrap leading-relaxed'>
                     {comment.content}

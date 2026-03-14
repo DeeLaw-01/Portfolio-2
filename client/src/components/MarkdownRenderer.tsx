@@ -101,7 +101,7 @@ export default function MarkdownRenderer ({
                   </div>
                 )}
                 <SyntaxHighlighter
-                  style={atomDark}
+                  style={atomDark as any}
                   language={match?.[1] || 'text'}
                   PreTag='div'
                   customStyle={{
@@ -110,7 +110,6 @@ export default function MarkdownRenderer ({
                     background: 'rgba(0,0,0,0.3)',
                     fontSize: '0.875rem'
                   }}
-                  {...props}
                 >
                   {String(children).replace(/\n$/, '')}
                 </SyntaxHighlighter>
