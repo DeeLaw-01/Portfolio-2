@@ -42,6 +42,14 @@ export default function AdminBlogEditor () {
   const isEditing = !!id
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const pendingCursorRef = useRef<{
+    start: number
+    end: number
+    scrollTop: number
+  } | null>(null)
+  const contentHistoryRef = useRef<string[]>([])
+  const historyIndexRef = useRef<number>(-1)
+  const isUndoRedoRef = useRef<boolean>(false)
 
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
@@ -60,6 +68,8 @@ export default function AdminBlogEditor () {
   const [newTagName, setNewTagName] = useState('')
   const [showNewTag, setShowNewTag] = useState(false)
   const [isRefining, setIsRefining] = useState(false)
+  const [showRefineModal, setShowRefineModal] = useState(false)
+  const [refineInstruction, setRefineInstruction] = useState('')
   const [preRefineState, setPreRefineState] = useState<{
     title: string
     excerpt: string
@@ -68,7 +78,13 @@ export default function AdminBlogEditor () {
 
   useEffect(() => {
     loadTags()
-    if (isEditing) loadBlog()
+    if (isEditing) {
+      loadBlog()
+    } else {
+      // Initialize history for new posts
+      contentHistoryRef.current = ['']
+      historyIndexRef.current = 0
+    }
   }, [id])
 
   // Auto-generate slug from title
@@ -82,6 +98,46 @@ export default function AdminBlogEditor () {
       )
     }
   }, [title, isEditing])
+
+  // Track content history for undo/redo (but not during undo/redo operations)
+  useEffect(() => {
+    if (isUndoRedoRef.current) {
+      isUndoRedoRef.current = false
+      return
+    }
+    const history = contentHistoryRef.current
+    const index = historyIndexRef.current
+    // Remove any "future" history if we're not at the end
+    if (index < history.length - 1) {
+      contentHistoryRef.current = history.slice(0, index + 1)
+    }
+    // Add new state to history (max 50 entries)
+    contentHistoryRef.current.push(content)
+    if (contentHistoryRef.current.length > 50) {
+      contentHistoryRef.current.shift()
+    } else {
+      historyIndexRef.current = contentHistoryRef.current.length - 1
+    }
+  }, [content])
+
+  // Restore cursor position and scroll after content state update re-renders the textarea
+  useEffect(() => {
+    const pending = pendingCursorRef.current
+    const textarea = textareaRef.current
+    if (!pending || !textarea) return
+    pendingCursorRef.current = null
+
+    // Use requestAnimationFrame to ensure DOM has updated
+    requestAnimationFrame(() => {
+      if (!textarea) return
+      // Restore scroll FIRST (before focus, which can cause scroll)
+      textarea.scrollTop = pending.scrollTop
+      textarea.selectionStart = pending.start
+      textarea.selectionEnd = pending.end
+      // Focus after setting scroll/cursor to prevent scroll jump
+      textarea.focus()
+    })
+  }, [content])
 
   const loadTags = async () => {
     try {
@@ -100,7 +156,11 @@ export default function AdminBlogEditor () {
         setTitle(blog.title)
         setSlug(blog.slug)
         setExcerpt(blog.excerpt)
-        setContent(blog.content)
+        const initialContent = blog.content
+        setContent(initialContent)
+        // Initialize history with the loaded content
+        contentHistoryRef.current = [initialContent]
+        historyIndexRef.current = 0
         setCoverImage(blog.coverImage || '')
         setSelectedTags(blog.tags.map((t: TagType) => t._id))
         setPublished(blog.published)
@@ -111,6 +171,27 @@ export default function AdminBlogEditor () {
       setIsLoading(false)
     }
   }
+
+  // Undo/Redo functions
+  const handleUndo = useCallback(() => {
+    const history = contentHistoryRef.current
+    const index = historyIndexRef.current
+    if (index > 0) {
+      isUndoRedoRef.current = true
+      historyIndexRef.current = index - 1
+      setContent(history[index - 1])
+    }
+  }, [])
+
+  const handleRedo = useCallback(() => {
+    const history = contentHistoryRef.current
+    const index = historyIndexRef.current
+    if (index < history.length - 1) {
+      isUndoRedoRef.current = true
+      historyIndexRef.current = index + 1
+      setContent(history[index + 1])
+    }
+  }, [])
 
   const handleSave = async (shouldPublish?: boolean) => {
     setError('')
@@ -233,6 +314,7 @@ export default function AdminBlogEditor () {
       const textarea = textareaRef.current
       if (!textarea) return
 
+      const scrollTop = textarea.scrollTop
       const start = textarea.selectionStart
       const end = textarea.selectionEnd
       const selected = content.substring(start, end)
@@ -243,19 +325,19 @@ export default function AdminBlogEditor () {
         insertText +
         after +
         content.substring(end)
-      setContent(newContent)
 
-      // Position cursor: if there was a selection, select the inserted text; otherwise place cursor inside
-      setTimeout(() => {
-        textarea.focus()
-        if (selected) {
-          textarea.selectionStart = start + before.length
-          textarea.selectionEnd = start + before.length + selected.length
-        } else {
-          textarea.selectionStart = start + before.length
-          textarea.selectionEnd = start + before.length + placeholder.length
-        }
-      }, 0)
+      // Store where cursor + scroll should be AFTER React re-renders
+      const cursorStart = start + before.length
+      const cursorEnd = selected
+        ? cursorStart + selected.length
+        : cursorStart + placeholder.length
+      pendingCursorRef.current = {
+        start: cursorStart,
+        end: cursorEnd,
+        scrollTop
+      }
+
+      setContent(newContent)
     },
     [content]
   )
@@ -355,11 +437,12 @@ export default function AdminBlogEditor () {
     }
   ]
 
-  const handleRefine = async () => {
+  const handleRefine = async (instruction?: string) => {
     if (!content.trim() && !title.trim() && !excerpt.trim()) {
       setError('Write something first before asking AI to refine it.')
       return
     }
+    setShowRefineModal(false)
     setIsRefining(true)
     setError('')
     // Save current state for revert
@@ -368,7 +451,8 @@ export default function AdminBlogEditor () {
       const res = await blogService.refineBlogContent({
         title: title.trim() || undefined,
         excerpt: excerpt.trim() || undefined,
-        content: content.trim() || undefined
+        content: content.trim() || undefined,
+        instruction: instruction?.trim() || undefined
       })
       if (res.success && res.refined) {
         if (res.refined.title) setTitle(res.refined.title)
@@ -383,6 +467,7 @@ export default function AdminBlogEditor () {
       setError('AI refinement failed. Check your Gemini API key.')
     } finally {
       setIsRefining(false)
+      setRefineInstruction('')
     }
   }
 
@@ -524,7 +609,15 @@ export default function AdminBlogEditor () {
                       <button
                         key={i}
                         type='button'
-                        onClick={(item as any).action}
+                        onClick={e => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          ;(item as any).action()
+                        }}
+                        onMouseDown={e => {
+                          // Prevent button from taking focus away from textarea
+                          e.preventDefault()
+                        }}
                         className='p-1.5 rounded-lg hover:bg-white/[0.1] text-[#dadada]/50 hover:text-[#dadada] transition-colors'
                         title={(item as any).label}
                       >
@@ -542,6 +635,25 @@ export default function AdminBlogEditor () {
                   className='w-full bg-white/[0.04] border border-white/[0.05] rounded-[20px] px-5 py-4 text-sm text-[#dadada] placeholder-[#dadada]/20 focus:outline-none focus:border-[#a855f7]/30 resize-none font-mono leading-relaxed min-h-[500px]'
                   style={{ tabSize: 2 }}
                   onKeyDown={e => {
+                    // Handle Undo (Ctrl+Z or Cmd+Z)
+                    if (
+                      (e.ctrlKey || e.metaKey) &&
+                      e.key === 'z' &&
+                      !e.shiftKey
+                    ) {
+                      e.preventDefault()
+                      handleUndo()
+                      return
+                    }
+                    // Handle Redo (Ctrl+Y or Ctrl+Shift+Z or Cmd+Shift+Z)
+                    if (
+                      ((e.ctrlKey || e.metaKey) && e.key === 'y') ||
+                      ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey)
+                    ) {
+                      e.preventDefault()
+                      handleRedo()
+                      return
+                    }
                     // Handle Tab key for indentation
                     if (e.key === 'Tab') {
                       e.preventDefault()
@@ -735,9 +847,12 @@ export default function AdminBlogEditor () {
           </button>
         )}
 
-        {/* AI Refine Button — triggers directly, no modal */}
+        {/* AI Refine Button — opens instruction popup */}
         <button
-          onClick={handleRefine}
+          onClick={() => {
+            if (isRefining) return
+            setShowRefineModal(true)
+          }}
           disabled={
             isRefining || (!content.trim() && !title.trim() && !excerpt.trim())
           }
@@ -776,6 +891,67 @@ export default function AdminBlogEditor () {
           </span>
         </button>
       </div>
+
+      {/* AI Refine Instruction Modal */}
+      {showRefineModal && (
+        <div className='fixed inset-0 z-[60] flex items-center justify-center'>
+          {/* Backdrop */}
+          <div
+            className='absolute inset-0 bg-black/60 backdrop-blur-sm'
+            onClick={() => {
+              setShowRefineModal(false)
+              setRefineInstruction('')
+            }}
+          />
+          {/* Modal */}
+          <div className='relative bg-[#1a1a2e] border border-white/[0.1] rounded-2xl p-6 w-full max-w-md shadow-2xl'>
+            <h3 className='text-lg font-semibold text-white mb-1 flex items-center gap-2'>
+              <Sparkles className='w-5 h-5 text-[#a855f7]' />
+              AI Refine
+            </h3>
+            <p className='text-xs text-[#dadada]/40 mb-4'>
+              Add any extra instructions, or just hit Refine to use the
+              defaults.
+            </p>
+            <textarea
+              placeholder='e.g. "Make it more technical", "Add a TL;DR at the top", "Keep it under 500 words"...'
+              value={refineInstruction}
+              onChange={e => setRefineInstruction(e.target.value)}
+              rows={3}
+              className='w-full bg-white/[0.06] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-[#dadada] placeholder-[#dadada]/25 focus:outline-none focus:border-[#a855f7]/40 resize-none mb-4'
+              autoFocus
+              onKeyDown={e => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                  handleRefine(refineInstruction)
+                }
+              }}
+            />
+            <div className='flex items-center justify-between'>
+              <span className='text-[10px] text-[#dadada]/30'>
+                Ctrl+Enter to refine
+              </span>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={() => {
+                    setShowRefineModal(false)
+                    setRefineInstruction('')
+                  }}
+                  className='px-4 py-2 rounded-xl text-sm text-[#dadada]/60 hover:text-[#dadada] hover:bg-white/[0.06] transition-colors'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleRefine(refineInstruction)}
+                  className='bg-gradient-to-r from-[#7203a9] to-[#a855f7] hover:from-[#8a1bb8] hover:to-[#c084fc] text-white px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2'
+                >
+                  <Sparkles className='w-4 h-4' />
+                  Refine
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   )
 }

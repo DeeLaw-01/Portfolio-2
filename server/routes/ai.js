@@ -52,7 +52,7 @@ const EXCERPT_PROMPT = `You are a blog excerpt writer. Given a rough description
 
 // POST /api/ai/refine — Refine blog content, title, and excerpt using Gemini
 router.post('/refine', requireAdmin, async (req, res) => {
-  const { title, excerpt, content } = req.body
+  const { title, excerpt, content, instruction } = req.body
 
   if (!content?.trim() && !title?.trim() && !excerpt?.trim()) {
     return res.status(400).json({
@@ -71,9 +71,14 @@ router.post('/refine', requireAdmin, async (req, res) => {
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' })
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-3.1-flash-lite-preview'
+    })
 
     const results = {}
+    const extra = instruction?.trim()
+      ? `\n\nADDITIONAL INSTRUCTION FROM THE AUTHOR: ${instruction.trim()}`
+      : ''
 
     // Refine all provided fields in parallel
     const tasks = []
@@ -82,7 +87,7 @@ router.post('/refine', requireAdmin, async (req, res) => {
       tasks.push(
         model
           .generateContent([
-            { text: CONTENT_PROMPT },
+            { text: CONTENT_PROMPT + extra },
             { text: `Here is the raw blog content:\n\n${content}` }
           ])
           .then(r => {
@@ -95,7 +100,7 @@ router.post('/refine', requireAdmin, async (req, res) => {
       tasks.push(
         model
           .generateContent([
-            { text: TITLE_PROMPT },
+            { text: TITLE_PROMPT + extra },
             { text: `Raw title: ${title}` }
           ])
           .then(r => {
@@ -108,7 +113,7 @@ router.post('/refine', requireAdmin, async (req, res) => {
       tasks.push(
         model
           .generateContent([
-            { text: EXCERPT_PROMPT },
+            { text: EXCERPT_PROMPT + extra },
             { text: `Raw excerpt: ${excerpt}` }
           ])
           .then(r => {
@@ -132,6 +137,47 @@ router.post('/refine', requireAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: `AI refinement failed: ${error.message || 'Unknown error'}`
+    })
+  }
+})
+
+// Temporary endpoint to list available models
+router.get('/models', requireAdmin, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    return res.status(500).json({
+      success: false,
+      message: 'Gemini API key not configured'
+    })
+  }
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+    )
+    const data = await response.json()
+
+    // Filter to only show models that support generateContent
+    const generateContentModels =
+      data.models
+        ?.filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+        .map(m => ({
+          name: m.name,
+          displayName: m.displayName,
+          description: m.description,
+          supportedMethods: m.supportedGenerationMethods
+        })) || []
+
+    res.json({
+      success: true,
+      models: generateContentModels,
+      allModels: data.models
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Failed to list models: ${error.message}`,
+      error: error.toString()
     })
   }
 })

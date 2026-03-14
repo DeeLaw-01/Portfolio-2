@@ -243,7 +243,7 @@ class BlogService {
   // ==================== AI ====================
 
   async refineBlogContent(
-    data: { title?: string; excerpt?: string; content?: string }
+    data: { title?: string; excerpt?: string; content?: string; instruction?: string }
   ): Promise<{
     success: boolean
     refined?: { title: string | null; excerpt: string | null; content: string | null }
