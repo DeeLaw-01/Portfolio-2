@@ -242,11 +242,17 @@ class BlogService {
 
   // ==================== AI ====================
 
-  async refineBlogContent(content: string): Promise<{ success: boolean; refined?: string; message?: string }> {
+  async refineBlogContent(
+    data: { title?: string; excerpt?: string; content?: string }
+  ): Promise<{
+    success: boolean
+    refined?: { title: string | null; excerpt: string | null; content: string | null }
+    message?: string
+  }> {
     const res = await fetch(`${API_URL}/api/ai/refine`, {
       method: 'POST',
       headers: authService.getAuthHeaders(),
-      body: JSON.stringify({ content })
+      body: JSON.stringify(data)
     })
     return res.json()
   }

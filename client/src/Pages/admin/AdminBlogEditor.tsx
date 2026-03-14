@@ -9,7 +9,8 @@ import {
   ArrowLeft,
   Loader2,
   X,
-  Plus
+  Plus,
+  Sparkles
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import MarkdownRenderer from '../../components/MarkdownRenderer'
@@ -43,6 +44,12 @@ export default function AdminBlogEditor () {
   const [error, setError] = useState('')
   const [newTagName, setNewTagName] = useState('')
   const [showNewTag, setShowNewTag] = useState(false)
+  const [isRefining, setIsRefining] = useState(false)
+  const [preRefineState, setPreRefineState] = useState<{
+    title: string
+    excerpt: string
+    content: string
+  } | null>(null)
 
   useEffect(() => {
     loadTags()
@@ -202,6 +209,46 @@ export default function AdminBlogEditor () {
     setSelectedTags(prev =>
       prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]
     )
+  }
+
+  const handleRefine = async () => {
+    if (!content.trim() && !title.trim() && !excerpt.trim()) {
+      setError('Write something first before asking AI to refine it.')
+      return
+    }
+    setIsRefining(true)
+    setError('')
+    // Save current state for revert
+    setPreRefineState({ title, excerpt, content })
+    try {
+      const res = await blogService.refineBlogContent({
+        title: title.trim() || undefined,
+        excerpt: excerpt.trim() || undefined,
+        content: content.trim() || undefined
+      })
+      if (res.success && res.refined) {
+        if (res.refined.title) setTitle(res.refined.title)
+        if (res.refined.excerpt) setExcerpt(res.refined.excerpt)
+        if (res.refined.content) setContent(res.refined.content)
+      } else {
+        setPreRefineState(null)
+        setError(res.message || 'AI refinement failed.')
+      }
+    } catch {
+      setPreRefineState(null)
+      setError('AI refinement failed. Check your Gemini API key.')
+    } finally {
+      setIsRefining(false)
+    }
+  }
+
+  const handleRevert = () => {
+    if (preRefineState !== null) {
+      setTitle(preRefineState.title)
+      setExcerpt(preRefineState.excerpt)
+      setContent(preRefineState.content)
+      setPreRefineState(null)
+    }
   }
 
   if (isLoading) {
@@ -509,21 +556,61 @@ export default function AdminBlogEditor () {
         </div>
       </div>
 
-      {/* Floating Preview Button */}
-      <button
-        onClick={() => setShowPreview(!showPreview)}
-        className='fixed bottom-6 right-6 bg-[#7203a9] hover:bg-[#8a1bb8] text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 z-50 flex items-center gap-2 group'
-        title={showPreview ? 'Show Editor' : 'Show Preview'}
-      >
-        {showPreview ? (
-          <EyeOff className='w-5 h-5' />
-        ) : (
-          <Eye className='w-5 h-5' />
+      {/* Floating Buttons */}
+      <div className='fixed bottom-6 right-6 z-50 flex items-center gap-3'>
+        {/* Revert Button — only visible after a successful AI refine */}
+        {preRefineState !== null && (
+          <button
+            onClick={handleRevert}
+            className='bg-white/[0.08] hover:bg-white/[0.12] text-[#dadada] border border-white/[0.1] p-4 rounded-full shadow-lg transition-all hover:scale-110 flex items-center gap-2'
+            title='Revert to pre-refine content'
+          >
+            <ArrowLeft className='w-5 h-5' />
+            <span className='hidden sm:inline text-sm font-medium'>Revert</span>
+          </button>
         )}
-        <span className='hidden sm:inline text-sm font-medium'>
-          {showPreview ? 'Editor' : 'Preview'}
-        </span>
-      </button>
+
+        {/* AI Refine Button — triggers directly, no modal */}
+        <button
+          onClick={handleRefine}
+          disabled={
+            isRefining || (!content.trim() && !title.trim() && !excerpt.trim())
+          }
+          className={`text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 flex items-center gap-2 ${
+            isRefining
+              ? 'bg-[#a855f7]/50 cursor-wait'
+              : !content.trim() && !title.trim() && !excerpt.trim()
+              ? 'bg-white/[0.08] cursor-not-allowed opacity-40'
+              : 'bg-gradient-to-r from-[#7203a9] to-[#a855f7] hover:from-[#8a1bb8] hover:to-[#c084fc]'
+          }`}
+          title='AI Refine with Gemini'
+        >
+          {isRefining ? (
+            <Loader2 className='w-5 h-5 animate-spin' />
+          ) : (
+            <Sparkles className='w-5 h-5' />
+          )}
+          <span className='hidden sm:inline text-sm font-medium'>
+            {isRefining ? 'Refining...' : 'AI Refine'}
+          </span>
+        </button>
+
+        {/* Preview Button */}
+        <button
+          onClick={() => setShowPreview(!showPreview)}
+          className='bg-[#7203a9] hover:bg-[#8a1bb8] text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 flex items-center gap-2'
+          title={showPreview ? 'Show Editor' : 'Show Preview'}
+        >
+          {showPreview ? (
+            <EyeOff className='w-5 h-5' />
+          ) : (
+            <Eye className='w-5 h-5' />
+          )}
+          <span className='hidden sm:inline text-sm font-medium'>
+            {showPreview ? 'Editor' : 'Preview'}
+          </span>
+        </button>
+      </div>
     </AdminLayout>
   )
 }

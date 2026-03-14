@@ -92,7 +92,7 @@ export default function Hero ({
             className={`group-hover:text-white transition-colors duration-300 ${
               is4K
                 ? 'text-5xl leading-[96px] -mb-6'
-                : 'text-4xl leading-tight -mb-1'
+                : 'text-4xl leading-tight -mb-1 mt-2'
             }`}
           >
             Design Meets
