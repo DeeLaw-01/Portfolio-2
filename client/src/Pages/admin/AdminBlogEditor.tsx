@@ -10,7 +10,22 @@ import {
   Loader2,
   X,
   Plus,
-  Sparkles
+  Sparkles,
+  Bold,
+  Italic,
+  Heading1,
+  Heading2,
+  Heading3,
+  Link,
+  Code,
+  Quote,
+  List,
+  ListOrdered,
+  Table,
+  Minus,
+  Youtube,
+  Twitter,
+  FileCode
 } from 'lucide-react'
 import AdminLayout from '../../components/AdminLayout'
 import MarkdownRenderer from '../../components/MarkdownRenderer'
@@ -211,6 +226,135 @@ export default function AdminBlogEditor () {
     )
   }
 
+  // ── Toolbar insert helpers ──────────────────────────────────────────
+
+  const insertAtCursor = useCallback(
+    (before: string, after: string = '', placeholder: string = '') => {
+      const textarea = textareaRef.current
+      if (!textarea) return
+
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const selected = content.substring(start, end)
+      const insertText = selected || placeholder
+      const newContent =
+        content.substring(0, start) +
+        before +
+        insertText +
+        after +
+        content.substring(end)
+      setContent(newContent)
+
+      // Position cursor: if there was a selection, select the inserted text; otherwise place cursor inside
+      setTimeout(() => {
+        textarea.focus()
+        if (selected) {
+          textarea.selectionStart = start + before.length
+          textarea.selectionEnd = start + before.length + selected.length
+        } else {
+          textarea.selectionStart = start + before.length
+          textarea.selectionEnd = start + before.length + placeholder.length
+        }
+      }, 0)
+    },
+    [content]
+  )
+
+  const toolbarActions = [
+    {
+      icon: Heading1,
+      label: 'H1',
+      action: () => insertAtCursor('\n# ', '\n', 'Heading')
+    },
+    {
+      icon: Heading2,
+      label: 'H2',
+      action: () => insertAtCursor('\n## ', '\n', 'Heading')
+    },
+    {
+      icon: Heading3,
+      label: 'H3',
+      action: () => insertAtCursor('\n### ', '\n', 'Heading')
+    },
+    { type: 'divider' as const },
+    {
+      icon: Bold,
+      label: 'Bold',
+      action: () => insertAtCursor('**', '**', 'bold text')
+    },
+    {
+      icon: Italic,
+      label: 'Italic',
+      action: () => insertAtCursor('*', '*', 'italic text')
+    },
+    {
+      icon: Code,
+      label: 'Inline code',
+      action: () => insertAtCursor('`', '`', 'code')
+    },
+    { type: 'divider' as const },
+    {
+      icon: Link,
+      label: 'Link',
+      action: () => insertAtCursor('[', '](https://)', 'link text')
+    },
+    {
+      icon: ImageIcon,
+      label: 'Image',
+      action: () => fileInputRef.current?.click()
+    },
+    {
+      icon: Quote,
+      label: 'Blockquote',
+      action: () => insertAtCursor('\n> ', '\n', 'quote')
+    },
+    {
+      icon: Minus,
+      label: 'Horizontal rule',
+      action: () => insertAtCursor('\n---\n')
+    },
+    { type: 'divider' as const },
+    {
+      icon: List,
+      label: 'Bullet list',
+      action: () => insertAtCursor('\n- ', '\n', 'item')
+    },
+    {
+      icon: ListOrdered,
+      label: 'Numbered list',
+      action: () => insertAtCursor('\n1. ', '\n', 'item')
+    },
+    {
+      icon: FileCode,
+      label: 'Code block',
+      action: () =>
+        insertAtCursor('\n```javascript\n', '\n```\n', '// code here')
+    },
+    {
+      icon: Table,
+      label: 'Table',
+      action: () =>
+        insertAtCursor(
+          '\n| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| ',
+          ' | cell | cell |\n',
+          'cell'
+        )
+    },
+    { type: 'divider' as const },
+    {
+      icon: Youtube,
+      label: 'YouTube embed',
+      action: () =>
+        insertAtCursor('\n', '\n', 'https://www.youtube.com/watch?v=VIDEO_ID')
+    },
+    {
+      icon: Twitter,
+      label: 'Tweet embed',
+      action: () =>
+        insertAtCursor('\n', '\n', 'https://twitter.com/user/status/123456789')
+    }
+  ]
+
   const handleRefine = async () => {
     if (!content.trim() && !title.trim() && !excerpt.trim()) {
       setError('Write something first before asking AI to refine it.')
@@ -364,9 +508,35 @@ export default function AdminBlogEditor () {
                 onDrop={handleDrop}
                 onDragOver={e => e.preventDefault()}
               >
+                {/* Floating Toolbar */}
+                <div className='flex items-center gap-0.5 flex-wrap bg-white/[0.06] border border-white/[0.08] rounded-xl px-2 py-1.5 mb-2'>
+                  {toolbarActions.map((item, i) => {
+                    if ('type' in item && item.type === 'divider') {
+                      return (
+                        <div
+                          key={`div-${i}`}
+                          className='w-px h-5 bg-white/[0.1] mx-1'
+                        />
+                      )
+                    }
+                    const Icon = (item as any).icon
+                    return (
+                      <button
+                        key={i}
+                        type='button'
+                        onClick={(item as any).action}
+                        className='p-1.5 rounded-lg hover:bg-white/[0.1] text-[#dadada]/50 hover:text-[#dadada] transition-colors'
+                        title={(item as any).label}
+                      >
+                        <Icon className='w-4 h-4' />
+                      </button>
+                    )
+                  })}
+                </div>
+
                 <textarea
                   ref={textareaRef}
-                  placeholder='Write your post in Markdown...'
+                  placeholder='Write your post in Markdown... Paste YouTube, Twitter/X, Reddit, GitHub Gist, or CodePen URLs on their own line for auto-embeds.'
                   value={content}
                   onChange={e => setContent(e.target.value)}
                   className='w-full bg-white/[0.04] border border-white/[0.05] rounded-[20px] px-5 py-4 text-sm text-[#dadada] placeholder-[#dadada]/20 focus:outline-none focus:border-[#a855f7]/30 resize-none font-mono leading-relaxed min-h-[500px]'
@@ -398,28 +568,23 @@ export default function AdminBlogEditor () {
                   </div>
                 )}
 
-                {/* Editor toolbar */}
-                <div className='absolute bottom-3 right-3 flex items-center gap-1'>
-                  <input
-                    type='file'
-                    ref={fileInputRef}
-                    onChange={e => {
-                      const file = e.target.files?.[0]
-                      if (file) handleImageUpload(file)
-                      e.target.value = ''
-                    }}
-                    accept='image/*'
-                    className='hidden'
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className='p-2 rounded-lg bg-white/[0.08] hover:bg-white/[0.15] text-[#dadada]/50 hover:text-[#dadada] transition-colors'
-                    title='Insert image'
-                  >
-                    <ImageIcon className='w-4 h-4' />
-                  </button>
-                  <span className='text-[10px] text-[#dadada]/20 ml-1'>
-                    Drop images here or click 📷
+                {/* Hidden file input for image uploads */}
+                <input
+                  type='file'
+                  ref={fileInputRef}
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file)
+                    e.target.value = ''
+                  }}
+                  accept='image/*'
+                  className='hidden'
+                />
+
+                {/* Drop hint */}
+                <div className='absolute bottom-3 right-3'>
+                  <span className='text-[10px] text-[#dadada]/20'>
+                    Drop images to upload
                   </span>
                 </div>
               </div>
