@@ -73,7 +73,7 @@ export default function About ({
             backgroundColor='transparent'
             wireframes={false}
             gravity={0.8}
-            fontSize='clamp(12px, 3vw, 17px)'
+            fontSize='clamp(14px, 3.5vw, 17px)'
             mouseConstraintStiffness={0.6}
           />
         </div>

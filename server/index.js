@@ -99,6 +99,53 @@ app.post('/api/contact', async (req, res) => {
   }
 })
 
+// Twitter syndication proxy (bypasses regional blocks on cdn.syndication.twimg.com)
+app.get('/api/twitter/tweet/:id', async (req, res) => {
+  const { id } = req.params
+
+  if (!/^\d+$/.test(id)) {
+    return res.status(400).json({ error: 'Invalid tweet ID' })
+  }
+
+  try {
+    // Same logic react-tweet uses internally
+    const token = (Number(id) / 1e15 * Math.PI).toString(36).replace(/(0+|\.)/g, '')
+    const syndicationUrl = new URL('https://cdn.syndication.twimg.com/tweet-result')
+    syndicationUrl.searchParams.set('id', id)
+    syndicationUrl.searchParams.set('lang', 'en')
+    syndicationUrl.searchParams.set('features', [
+      'tfw_timeline_list:',
+      'tfw_follower_count_sunset:true',
+      'tfw_tweet_edit_backend:on',
+      'tfw_refsrc_session:on',
+      'tfw_fosnr_soft_interventions_enabled:on',
+      'tfw_show_birdwatch_pivots_enabled:on',
+      'tfw_show_business_verified_badge:on',
+      'tfw_duplicate_scribes_to_settings:on',
+      'tfw_use_profile_image_shape_enabled:on',
+      'tfw_show_blue_verified_badge:on',
+      'tfw_legacy_timeline_sunset:true',
+      'tfw_show_gov_verified_badge:on',
+      'tfw_show_business_affiliate_badge:on',
+      'tfw_tweet_edit_frontend:on'
+    ].join(';'))
+    syndicationUrl.searchParams.set('token', token)
+
+    const response = await fetch(syndicationUrl.toString())
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: `Twitter API returned ${response.status}` })
+    }
+
+    const data = await response.json()
+    // react-tweet expects { data: ... } wrapper
+    res.json({ data })
+  } catch (error) {
+    console.error('Twitter proxy error:', error)
+    res.status(500).json({ error: 'Failed to fetch tweet' })
+  }
+})
+
 // GitHub API Routes
 
 // GET /api/github/recent-activity - Get recent GitHub commits (including private repos)

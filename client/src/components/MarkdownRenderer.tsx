@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { Tweet } from 'react-tweet'
 
 interface MarkdownRendererProps {
   content: string
@@ -36,50 +37,18 @@ function YouTubeEmbed ({ videoId }: { videoId: string }) {
   )
 }
 
+const TWEET_API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:4000') + '/api/twitter/tweet'
+
+/** Extract the tweet ID from a twitter.com or x.com URL */
+function extractTweetId (url: string): string | null {
+  const match = /(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/.exec(url)
+  return match ? match[1] : null
+}
+
 function TwitterEmbed ({ url }: { url: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [html, setHtml] = useState<string | null>(null)
-  const [failed, setFailed] = useState(false)
+  const tweetId = extractTweetId(url)
 
-  useEffect(() => {
-    let cancelled = false
-
-    // Use Twitter's oEmbed endpoint to get the embed HTML
-    const fetchEmbed = async () => {
-      try {
-        const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&theme=dark&omit_script=false&dnt=true`
-        const res = await fetch(oembedUrl)
-        if (!res.ok) throw new Error('oEmbed failed')
-        const data = await res.json()
-        if (!cancelled && data.html) {
-          setHtml(data.html)
-        }
-      } catch {
-        if (!cancelled) setFailed(true)
-      }
-    }
-
-    fetchEmbed()
-    return () => { cancelled = true }
-  }, [url])
-
-  // After injecting HTML, load the Twitter widget script
-  useEffect(() => {
-    if (!html || !ref.current) return
-    // Load/reload the Twitter widget script
-    const existingScript = document.querySelector('script[src*="platform.twitter.com/widgets.js"]')
-    if (existingScript) {
-      ;(window as any).twttr?.widgets?.load(ref.current)
-    } else {
-      const script = document.createElement('script')
-      script.src = 'https://platform.twitter.com/widgets.js'
-      script.async = true
-      script.charset = 'utf-8'
-      ref.current.appendChild(script)
-    }
-  }, [html])
-
-  if (failed) {
+  if (!tweetId) {
     return (
       <div className='my-6 flex justify-center'>
         <a
@@ -97,22 +66,19 @@ function TwitterEmbed ({ url }: { url: string }) {
     )
   }
 
-  if (!html) {
-    return (
-      <div className='my-6 flex justify-center'>
-        <div className='bg-white/[0.06] border border-white/10 rounded-xl px-5 py-4 text-[#dadada]/50 text-sm animate-pulse'>
-          Loading tweet...
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div
-      ref={ref}
-      className='my-6 flex justify-center [&_twitter-widget]:rounded-xl'
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <div className='my-6 flex justify-center not-prose' data-theme='dark'>
+      <Tweet
+        id={tweetId}
+        apiUrl={`${TWEET_API_URL}/${tweetId}`}
+        fallback={
+          <div className='bg-white/[0.06] border border-white/10 rounded-xl px-5 py-4 text-[#dadada]/50 text-sm animate-pulse'>
+            Loading tweet…
+          </div>
+        }
+        onError={(err: any) => console.error('Tweet embed error:', err)}
+      />
+    </div>
   )
 }
 
@@ -294,6 +260,19 @@ export default function MarkdownRenderer ({
               const embed = getEmbedForUrl(text)
               if (embed) return <>{embed}</>
             }
+
+            // remarkGfm auto-links URLs, so a standalone URL becomes <p><a href="...">...</a></p>
+            // Check if children is a single <a> element whose href is an embed URL
+            const childArray = Array.isArray(children) ? children : [children]
+            if (childArray.length === 1 && childArray[0] && typeof childArray[0] === 'object' && 'props' in childArray[0]) {
+              const child = childArray[0] as any
+              const href = child?.props?.href
+              if (typeof href === 'string') {
+                const embed = getEmbedForUrl(href)
+                if (embed) return <>{embed}</>
+              }
+            }
+
             return (
               <p className='text-[#dadada]/90 leading-relaxed mb-4 text-base md:text-lg'>
                 {children}
@@ -323,17 +302,29 @@ export default function MarkdownRenderer ({
             return <div {...props}>{children}</div>
           },
 
-          // Links
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-[#a855f7] hover:text-[#c084fc] underline underline-offset-2 transition-colors'
-            >
-              {children}
-            </a>
-          ),
+          // Links — also check if it's a standalone embed URL that was auto-linked
+          a: ({ href, children }) => {
+            // If the link text matches the href (auto-linked URL), check for embed
+            if (href && typeof children === 'string' && children.trim() === href.trim()) {
+              const embed = getEmbedForUrl(href)
+              if (embed) return <>{embed}</>
+            }
+            // Also check if children is an array with a single string matching href
+            if (href && Array.isArray(children) && children.length === 1 && typeof children[0] === 'string' && children[0].trim() === href.trim()) {
+              const embed = getEmbedForUrl(href)
+              if (embed) return <>{embed}</>
+            }
+            return (
+              <a
+                href={href}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-[#a855f7] hover:text-[#c084fc] underline underline-offset-2 transition-colors'
+              >
+                {children}
+              </a>
+            )
+          },
 
           // iframes (for raw HTML embeds pasted by user)
           iframe: ({ ...props }) => (
