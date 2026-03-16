@@ -22,6 +22,28 @@ export default function ContactModal ({ isOpen, onClose }: ContactModalProps) {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Store current scroll position
+      const scrollY = window.scrollY
+      // Lock body scroll
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      document.body.style.overflow = 'hidden'
+
+      return () => {
+        // Restore scroll position
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        document.body.style.overflow = ''
+        window.scrollTo(0, scrollY)
+      }
+    }
+  }, [isOpen])
+
   // Keyboard event handlers
   useEffect(() => {
     if (!isOpen) return
@@ -114,6 +136,8 @@ export default function ContactModal ({ isOpen, onClose }: ContactModalProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
           className='fixed inset-0 z-50 flex items-center justify-center p-4'
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           {/* Backdrop */}
           <motion.div
@@ -123,6 +147,8 @@ export default function ContactModal ({ isOpen, onClose }: ContactModalProps) {
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className='absolute inset-0 bg-black/60 backdrop-blur-sm'
             onClick={onClose}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
           />
 
           {/* Modal */}

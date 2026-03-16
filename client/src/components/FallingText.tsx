@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import Matter from 'matter-js'
 
 interface FallingTextProps {
@@ -27,10 +27,25 @@ const FallingText: React.FC<FallingTextProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const textRef = useRef<HTMLDivElement | null>(null)
   const canvasContainerRef = useRef<HTMLDivElement | null>(null)
-  const effectInitializedRef = useRef(false)
+
+  // Use a ref so the physics engine setup runs exactly once and never tears down
+  // until the component fully unmounts.
+  const engineRef = useRef<{
+    engine: Matter.Engine
+    render: Matter.Render
+    runner: Matter.Runner
+    rafId: number
+  } | null>(null)
 
   const [effectStarted, setEffectStarted] = useState(false)
+  // Keep a ref mirror so event handlers always see the latest value
+  const effectStartedRef = useRef(false)
 
+  // Stable callback ref so we never re-run effects when parent re-renders
+  const onEffectStartRef = useRef(onEffectStart)
+  onEffectStartRef.current = onEffectStart
+
+  // ── Render the word spans ──────────────────────────────────────────
   useEffect(() => {
     if (!textRef.current) return
     const words = text.split(' ')
@@ -51,10 +66,12 @@ const FallingText: React.FC<FallingTextProps> = ({
     textRef.current.innerHTML = newHTML
   }, [text, highlightWords])
 
+  // ── Auto / scroll triggers ─────────────────────────────────────────
   useEffect(() => {
     if (trigger === 'auto') {
       setEffectStarted(true)
-      onEffectStart?.()
+      effectStartedRef.current = true
+      onEffectStartRef.current?.()
       return
     }
     if (trigger === 'scroll' && containerRef.current) {
@@ -62,7 +79,8 @@ const FallingText: React.FC<FallingTextProps> = ({
         ([entry]) => {
           if (entry.isIntersecting) {
             setEffectStarted(true)
-            onEffectStart?.()
+            effectStartedRef.current = true
+            onEffectStartRef.current?.()
             observer.disconnect()
           }
         },
@@ -71,16 +89,20 @@ const FallingText: React.FC<FallingTextProps> = ({
       observer.observe(containerRef.current)
       return () => observer.disconnect()
     }
-  }, [trigger, onEffectStart])
+    // For click/hover triggers we handle them in event handlers below
+  }, [trigger]) // stable dep — trigger prop never changes at runtime
 
+  // ── Physics engine — runs exactly once when effectStarted flips to true ─
   useEffect(() => {
-    if (!effectStarted || effectInitializedRef.current) return
-    effectInitializedRef.current = true
+    if (!effectStarted) return
+    // Already running — don't re-init
+    if (engineRef.current) return
 
     const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint } =
       Matter
 
-    if (!containerRef.current || !canvasContainerRef.current) return
+    if (!containerRef.current || !canvasContainerRef.current || !textRef.current)
+      return
 
     const containerRect = containerRef.current.getBoundingClientRect()
     const width = containerRect.width
@@ -129,7 +151,6 @@ const FallingText: React.FC<FallingTextProps> = ({
     )
     const ceiling = Bodies.rectangle(width / 2, -25, width, 50, boundaryOptions)
 
-    if (!textRef.current) return
     const wordSpans = textRef.current.querySelectorAll('span')
     const wordBodies = [...wordSpans].map(elem => {
       const rect = elem.getBoundingClientRect()
@@ -186,6 +207,7 @@ const FallingText: React.FC<FallingTextProps> = ({
     Runner.run(runner, engine)
     Render.run(render)
 
+    let rafId = 0
     const updateLoop = () => {
       wordBodies.forEach(({ body, elem }) => {
         const { x, y } = body.position
@@ -194,47 +216,49 @@ const FallingText: React.FC<FallingTextProps> = ({
         elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`
       })
       Matter.Engine.update(engine)
-      requestAnimationFrame(updateLoop)
+      rafId = requestAnimationFrame(updateLoop)
     }
-    updateLoop()
+    rafId = requestAnimationFrame(updateLoop)
 
+    // Store references for cleanup on unmount only
+    engineRef.current = { engine, render, runner, rafId }
+
+    // Cleanup only on unmount (effectStarted will never flip back to false)
     return () => {
+      cancelAnimationFrame(rafId)
       Render.stop(render)
       Runner.stop(runner)
       if (render.canvas && canvasContainerRef.current) {
         try {
           canvasContainerRef.current.removeChild(render.canvas)
-        } catch (e) {
+        } catch (_) {
           // Canvas already removed
         }
       }
       World.clear(engine.world, false)
       Engine.clear(engine)
-      effectInitializedRef.current = false
+      engineRef.current = null
     }
-  }, [effectStarted, gravity, wireframes, backgroundColor, mouseConstraintStiffness])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectStarted])
+  // ↑ We intentionally only depend on effectStarted so this runs once.
+  // gravity/wireframes/etc. are initial config and won't change at runtime.
 
-  const handleTrigger = () => {
-    if (!effectStarted && (trigger === 'click' || trigger === 'hover')) {
+  const handleTrigger = useCallback(() => {
+    if (!effectStartedRef.current && (trigger === 'click' || trigger === 'hover')) {
       setEffectStarted(true)
-      onEffectStart?.()
+      effectStartedRef.current = true
+      onEffectStartRef.current?.()
     }
-  }
-
-  const handleTouchStart = () => {
-    if (!effectStarted && trigger === 'hover') {
-      setEffectStarted(true)
-      onEffectStart?.()
-    }
-  }
+  }, [trigger])
 
   return (
     <div
       ref={containerRef}
       className='relative z-[1] w-full h-full cursor-pointer text-center pt-8 overflow-hidden'
-      onClick={trigger === 'click' ? handleTrigger : undefined}
+      onClick={trigger === 'click' || trigger === 'hover' ? handleTrigger : undefined}
       onMouseEnter={trigger === 'hover' ? handleTrigger : undefined}
-      onTouchStart={trigger === 'hover' ? handleTouchStart : undefined}
+      onTouchStart={trigger === 'hover' ? handleTrigger : undefined}
     >
       <div
         ref={textRef}
