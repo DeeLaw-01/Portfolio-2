@@ -6,6 +6,7 @@ import {
   Calendar,
   Eye,
   ArrowRight,
+  ArrowUp,
   Tag,
   Heart,
   MessageCircle,
@@ -47,10 +48,29 @@ export default function BlogListPage() {
   const PAGE_SIZE = 12
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
+  // Scroll to top
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
+
   // Load all blog metadata + tags on mount (preload)
   useEffect(() => {
     loadData()
   }, [])
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollToTop(window.scrollY > 300)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
 
   const loadData = async () => {
     setIsLoading(true)
@@ -504,6 +524,19 @@ export default function BlogListPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Scroll to Top Button - Bottom Left */}
+      {showScrollToTop && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={scrollToTop}
+          className='fixed bottom-6 left-6 z-50 bg-[#7203a9] text-white p-3 rounded-full shadow-lg hover:bg-[#8a1bb8] transition-colors duration-200'
+        >
+          <ArrowUp className='w-5 h-5' />
+        </motion.button>
       )}
     </BlogLayout>
   )

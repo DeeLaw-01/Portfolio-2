@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
+  ArrowUp,
   Calendar,
   Eye,
   Clock,
@@ -54,6 +55,9 @@ export default function BlogPostPage() {
   const [likeCount, setLikeCount] = useState(0)
   const [likeAnimating, setLikeAnimating] = useState(false)
 
+  // Scroll to top
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
+
   // Comments
   const [comments, setComments] = useState<Comment[]>([])
   const [commentsLoading, setCommentsLoading] = useState(false)
@@ -71,6 +75,22 @@ export default function BlogPostPage() {
   useEffect(() => {
     if (slug) loadBlog()
   }, [slug])
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollToTop(window.scrollY > 300)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
 
   const loadBlog = async () => {
     setIsLoading(true)
@@ -475,6 +495,19 @@ export default function BlogPostPage() {
           )}
         </div>
       </article>
+
+      {/* Scroll to Top Button - Bottom Left */}
+      {showScrollToTop && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={scrollToTop}
+          className='fixed bottom-6 left-6 z-50 bg-[#7203a9] text-white p-3 rounded-full shadow-lg hover:bg-[#8a1bb8] transition-colors duration-200'
+        >
+          <ArrowUp className='w-5 h-5' />
+        </motion.button>
+      )}
     </BlogLayout>
   )
 }
