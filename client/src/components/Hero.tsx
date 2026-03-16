@@ -48,14 +48,14 @@ export default function Hero ({
     <div
       className={`bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] flex flex-col justify-between group w-full relative overflow-hidden hover:bg-white/[0.12] transition-all duration-300 ${
         isLargeScreen ? 'h-full min-h-[355px]' : 'h-[355px]'
-      } ${is4K ? 'p-8' : 'p-6'}`}
+      } ${is4K ? 'p-8' : 'p-4 md:p-6'}`}
     >
       {/* Subtle gradient overlay */}
       <div className='absolute inset-0 bg-gradient-to-br from-[#7203a9]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
       {/* Large GitCommit icon — spans full card height vertically */}
       <div
-        className='absolute top-1/2 -translate-y-1/2 -right-60 pointer-events-none md:block hidden'
+        className='absolute top-1/2 -translate-y-1/2 md:-right-60 -right-80 opacity-20 md:opacity-100 pointer-events-none block '
         style={{
           maskImage:
             'linear-gradient(to right, black 0%, black 50%, transparent 100%)',
@@ -73,7 +73,7 @@ export default function Hero ({
       </div>
 
       {/* GitHub Activity — commit info top-left */}
-      <div className='relative z-10 pt-10'>
+      <div className='relative z-10 pt-4 md:pt-10'>
         <GitHubActivity
           commits={commits}
           username={username}
@@ -85,21 +85,23 @@ export default function Hero ({
       {/* Main Slogan — anchored to bottom */}
       <div className='relative z-10 mt-auto'>
         <div
-          className='text-[#dadada] pb-12  pl-8'
+          className='text-[#dadada] pb-4 md:pb-12 pl-4 md:pl-8'
           style={{ letterSpacing: '0px', textAlign: 'left' }}
         >
           <div
             className={`group-hover:text-white transition-colors duration-300 ${
               is4K
                 ? 'text-5xl leading-[96px] -mb-6'
-                : 'text-4xl leading-tight -mb-1 mt-2'
+                : 'text-3xl md:text-4xl leading-tight -mb-1 mt-2'
             }`}
           >
             Design Meets
           </div>
           <div
             className={`font-extralight italic group-hover:text-white transition-colors duration-300 ${
-              is4K ? 'text-8xl leading-[96px]' : 'text-8xl leading-tight'
+              is4K
+                ? 'text-8xl leading-[96px]'
+                : 'text-6xl md:text-8xl leading-tight'
             }`}
           >
             Efficiency
@@ -108,7 +110,7 @@ export default function Hero ({
             className={`font-bold mt-1 group-hover:text-white transition-colors duration-300 ${
               is4K
                 ? 'text-4xl ml-48 leading-[72px]'
-                : 'text-2xl ml-36 leading-tight'
+                : 'text-sm md:text-2xl ml-0 md:ml-36 leading-tight'
             }`}
           >
             -Beautifully Coded.
