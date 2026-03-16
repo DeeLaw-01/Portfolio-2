@@ -10,6 +10,7 @@ interface FallingTextProps {
   gravity?: number
   mouseConstraintStiffness?: number
   fontSize?: string
+  onEffectStart?: () => void
 }
 
 const FallingText: React.FC<FallingTextProps> = ({
@@ -20,11 +21,13 @@ const FallingText: React.FC<FallingTextProps> = ({
   wireframes = false,
   gravity = 1,
   mouseConstraintStiffness = 0.2,
-  fontSize = '2rem'
+  fontSize = '2rem',
+  onEffectStart
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const textRef = useRef<HTMLDivElement | null>(null)
   const canvasContainerRef = useRef<HTMLDivElement | null>(null)
+  const effectInitializedRef = useRef(false)
 
   const [effectStarted, setEffectStarted] = useState(false)
 
@@ -51,6 +54,7 @@ const FallingText: React.FC<FallingTextProps> = ({
   useEffect(() => {
     if (trigger === 'auto') {
       setEffectStarted(true)
+      onEffectStart?.()
       return
     }
     if (trigger === 'scroll' && containerRef.current) {
@@ -58,6 +62,7 @@ const FallingText: React.FC<FallingTextProps> = ({
         ([entry]) => {
           if (entry.isIntersecting) {
             setEffectStarted(true)
+            onEffectStart?.()
             observer.disconnect()
           }
         },
@@ -66,10 +71,11 @@ const FallingText: React.FC<FallingTextProps> = ({
       observer.observe(containerRef.current)
       return () => observer.disconnect()
     }
-  }, [trigger])
+  }, [trigger, onEffectStart])
 
   useEffect(() => {
-    if (!effectStarted) return
+    if (!effectStarted || effectInitializedRef.current) return
+    effectInitializedRef.current = true
 
     const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint } =
       Matter
@@ -196,22 +202,29 @@ const FallingText: React.FC<FallingTextProps> = ({
       Render.stop(render)
       Runner.stop(runner)
       if (render.canvas && canvasContainerRef.current) {
-        canvasContainerRef.current.removeChild(render.canvas)
+        try {
+          canvasContainerRef.current.removeChild(render.canvas)
+        } catch (e) {
+          // Canvas already removed
+        }
       }
       World.clear(engine.world, false)
       Engine.clear(engine)
+      effectInitializedRef.current = false
     }
-  }, [
-    effectStarted,
-    gravity,
-    wireframes,
-    backgroundColor,
-    mouseConstraintStiffness
-  ])
+  }, [effectStarted, gravity, wireframes, backgroundColor, mouseConstraintStiffness])
 
   const handleTrigger = () => {
     if (!effectStarted && (trigger === 'click' || trigger === 'hover')) {
       setEffectStarted(true)
+      onEffectStart?.()
+    }
+  }
+
+  const handleTouchStart = () => {
+    if (!effectStarted && trigger === 'hover') {
+      setEffectStarted(true)
+      onEffectStart?.()
     }
   }
 
@@ -221,6 +234,7 @@ const FallingText: React.FC<FallingTextProps> = ({
       className='relative z-[1] w-full h-full cursor-pointer text-center pt-8 overflow-hidden'
       onClick={trigger === 'click' ? handleTrigger : undefined}
       onMouseEnter={trigger === 'hover' ? handleTrigger : undefined}
+      onTouchStart={trigger === 'hover' ? handleTouchStart : undefined}
     >
       <div
         ref={textRef}

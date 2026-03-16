@@ -37,6 +37,8 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const lastXRef = useRef(0)
   const dirRef = useRef<'left' | 'right'>(direction)
   const velRef = useRef(0)
+  const animationStartedRef = useRef(false)
+  const initialOffsetSetRef = useRef(false)
 
   const textLength = spacing
   const totalText = textLength
@@ -52,16 +54,19 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   }, [text, className])
 
   useEffect(() => {
-    if (!spacing) return
+    if (!spacing || initialOffsetSetRef.current) return
     if (textPathRef.current) {
       const initial = -spacing
       textPathRef.current.setAttribute('startOffset', initial + 'px')
       setOffset(initial)
+      initialOffsetSetRef.current = true
     }
   }, [spacing])
 
   useEffect(() => {
-    if (!spacing || !ready) return
+    if (!spacing || !ready || animationStartedRef.current) return
+    animationStartedRef.current = true
+    
     let frame = 0
     const step = () => {
       if (!dragRef.current && textPathRef.current) {
@@ -79,7 +84,10 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
       frame = requestAnimationFrame(step)
     }
     frame = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(frame)
+    return () => {
+      cancelAnimationFrame(frame)
+      animationStartedRef.current = false
+    }
   }, [spacing, speed, ready])
 
   const onPointerDown = (e: React.PointerEvent) => {

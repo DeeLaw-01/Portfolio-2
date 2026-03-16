@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import FallingText from './FallingText'
 import CurvedLoop from './CurvedLoop'
 import { ArrowDownLeft } from 'lucide-react'
@@ -11,6 +12,7 @@ export default function About ({
   isLargeScreen = false,
   is4K = false
 }: AboutProps) {
+  const [effectStarted, setEffectStarted] = useState(false)
   return (
     <div
       className={`bg-white/[0.08] backdrop-blur-sm border border-white/[0.05] rounded-[20px] flex flex-col w-full relative group hover:bg-white/[0.12] transition-all duration-300 overflow-hidden ${
@@ -22,10 +24,18 @@ export default function About ({
 
       {/* Interaction Hint - Top Left */}
       <div className='absolute top-3 right-3 md:top-4 md:right-4 z-20 flex items-center gap-1.5 text-[#dadada]/40 group-hover:text-[#dadada]/60 transition-colors duration-300'>
-        <ArrowDownLeft className='w-[1rem] h-[1rem] md:w-[1rem] md:h-[1rem]' />
+        {!effectStarted && (
+          <ArrowDownLeft className='w-[1rem] h-[1rem] md:w-[1rem] md:h-[1rem]' />
+        )}
         <span className='text-1rem md:text-xs font-light'>
-          <span className='md:hidden'>tap me</span>
-          <span className='hidden md:inline'>hover me</span>
+          {effectStarted ? (
+            'cool, right?'
+          ) : (
+            <>
+              <span className='md:hidden'>tap me</span>
+              <span className='hidden md:inline'>hover me</span>
+            </>
+          )}
         </span>
       </div>
 
@@ -75,6 +85,7 @@ export default function About ({
             gravity={0.8}
             fontSize='clamp(14px, 3.5vw, 17px)'
             mouseConstraintStiffness={0.6}
+            onEffectStart={() => setEffectStarted(true)}
           />
         </div>
       </div>

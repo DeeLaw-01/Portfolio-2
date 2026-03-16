@@ -73,7 +73,7 @@ export default function Hero ({
       </div>
 
       {/* GitHub Activity — commit info top-left */}
-      <div className='relative z-10 pt-4 md:pt-10'>
+      <div className='relative z-10 pt-4 md:pt-2'>
         <GitHubActivity
           commits={commits}
           username={username}
