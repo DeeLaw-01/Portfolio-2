@@ -60,6 +60,15 @@ const blogSchema = new mongoose.Schema(
 // Text index for fast full-text search on title, excerpt, and content
 blogSchema.index({ title: 'text', excerpt: 'text', content: 'text' })
 
+// Public list + /meta: filter by published, sort by newest
+blogSchema.index({ published: 1, publishedAt: -1 })
+// Tag filtering, sorted by date
+blogSchema.index({ tags: 1, publishedAt: -1 })
+// Admin list sorts by most recently updated
+blogSchema.index({ updatedAt: -1 })
+// "Top blogs" / most-viewed sort
+blogSchema.index({ published: 1, views: -1 })
+
 // Auto-generate slug from title before validation
 blogSchema.pre('validate', function (next) {
   if (this.title && (!this.slug || this.isModified('title'))) {

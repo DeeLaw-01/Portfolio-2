@@ -8,6 +8,7 @@ import Work from '../components/Work'
 import Contact from '../components/Contact'
 import Socials from '../components/Socials'
 import DitherWaleed from '../assets/dither.webp'
+import { blogService } from '../services/blogService'
 
 export default function HomePage () {
   const [showScrollToTop, setShowScrollToTop] = useState(false)
@@ -75,6 +76,22 @@ export default function HomePage () {
 
     return () => observer.disconnect()
   }, [isMobile])
+
+  // Warm the blog list in the background once the home page is idle.
+  // If the visitor never opens the blog, nothing is lost; if they do, it's instant.
+  useEffect(() => {
+    const prefetch = () => blogService.prefetchBlogList()
+    const ric = (window as any).requestIdleCallback as
+      | ((cb: () => void, opts?: { timeout: number }) => number)
+      | undefined
+
+    if (ric) {
+      const id = ric(prefetch, { timeout: 3000 })
+      return () => (window as any).cancelIdleCallback?.(id)
+    }
+    const id = window.setTimeout(prefetch, 1500)
+    return () => window.clearTimeout(id)
+  }, [])
 
   const scrollToTop = () => {
     window.scrollTo({

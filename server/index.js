@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import compression from 'compression'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import {
@@ -15,6 +16,7 @@ import aiRoutes from './routes/ai.js'
 dotenv.config()
 
 const app = express()
+app.use(compression())
 app.use(express.json())
 app.use(
   cors({

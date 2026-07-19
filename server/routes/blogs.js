@@ -38,7 +38,9 @@ router.get('/', async (req, res) => {
       .sort({ publishedAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
+      .lean()
 
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
     res.json({
       success: true,
       blogs,
@@ -65,7 +67,9 @@ router.get('/meta', async (req, res) => {
       .populate('tags', 'name slug color')
       .select('title slug excerpt tags publishedAt views likes commentsCount coverImage')
       .sort({ publishedAt: -1 })
+      .lean()
 
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
     res.json({ success: true, blogs })
   } catch (error) {
     res.status(500).json({
@@ -85,6 +89,7 @@ router.get('/stats', async (req, res) => {
     ])
     const totalTags = await Tag.countDocuments()
 
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
     res.json({
       success: true,
       stats: {
@@ -156,6 +161,7 @@ router.get('/search', async (req, res) => {
         .sort({ score: { $meta: 'textScore' } })
         .skip(skip)
         .limit(parseInt(limit))
+        .lean()
     } catch {
       // Fallback to regex search if text index doesn't exist yet
       const regexQuery = {
@@ -173,6 +179,7 @@ router.get('/search', async (req, res) => {
         .sort({ publishedAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
+        .lean()
     }
 
     res.json({
@@ -197,13 +204,14 @@ router.get('/search', async (req, res) => {
 // POST /api/blogs/:slug/like - Like a blog (public, anonymous)
 router.post('/:slug/like', async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug, published: true })
+    const blog = await Blog.findOneAndUpdate(
+      { slug: req.params.slug, published: true },
+      { $inc: { likes: 1 } },
+      { new: true, projection: { likes: 1 } }
+    ).lean()
     if (!blog) {
       return res.status(404).json({ success: false, message: 'Blog not found.' })
     }
-
-    blog.likes += 1
-    await blog.save()
 
     res.json({ success: true, likes: blog.likes })
   } catch (error) {
@@ -214,13 +222,14 @@ router.post('/:slug/like', async (req, res) => {
 // POST /api/blogs/:slug/unlike - Unlike a blog (public, anonymous)
 router.post('/:slug/unlike', async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug, published: true })
+    const blog = await Blog.findOneAndUpdate(
+      { slug: req.params.slug, published: true },
+      [{ $set: { likes: { $max: [0, { $subtract: ['$likes', 1] }] } } }],
+      { new: true, projection: { likes: 1 } }
+    ).lean()
     if (!blog) {
       return res.status(404).json({ success: false, message: 'Blog not found.' })
     }
-
-    blog.likes = Math.max(0, blog.likes - 1)
-    await blog.save()
 
     res.json({ success: true, likes: blog.likes })
   } catch (error) {
@@ -234,7 +243,9 @@ router.get('/:slug', async (req, res) => {
     const blog = await Blog.findOne({
       slug: req.params.slug,
       published: true
-    }).populate('tags', 'name slug color')
+    })
+      .populate('tags', 'name slug color')
+      .lean()
 
     if (!blog) {
       return res.status(404).json({
@@ -243,11 +254,13 @@ router.get('/:slug', async (req, res) => {
       })
     }
 
-    // Increment view count
-    blog.views += 1
-    await blog.save()
+    // Respond immediately with an optimistic view count...
+    res.json({ success: true, blog: { ...blog, views: blog.views + 1 } })
 
-    res.json({ success: true, blog })
+    // ...then increment atomically in the background (no validation/hooks, race-safe)
+    Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } }).catch(err =>
+      console.error('View increment failed:', err)
+    )
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -271,6 +284,7 @@ router.get('/admin/all', auth, async (req, res) => {
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
+      .lean()
 
     res.json({
       success: true,
@@ -306,6 +320,7 @@ router.get('/admin/stats', auth, async (req, res) => {
       .select('title slug views publishedAt')
       .sort({ views: -1 })
       .limit(5)
+      .lean()
 
     // Recent blogs
     const recentBlogs = await Blog.find()
@@ -313,6 +328,7 @@ router.get('/admin/stats', auth, async (req, res) => {
       .select('title slug published views updatedAt publishedAt')
       .sort({ updatedAt: -1 })
       .limit(5)
+      .lean()
 
     // Views over time (last 30 days - aggregate by blog creation)
     const thirtyDaysAgo = new Date()
@@ -341,10 +357,9 @@ router.get('/admin/stats', auth, async (req, res) => {
 // GET /api/blogs/admin/:id - Get a single blog by ID for editing (admin only)
 router.get('/admin/:id', auth, async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id).populate(
-      'tags',
-      'name slug color'
-    )
+    const blog = await Blog.findById(req.params.id)
+      .populate('tags', 'name slug color')
+      .lean()
 
     if (!blog) {
       return res.status(404).json({

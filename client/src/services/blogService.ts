@@ -87,7 +87,41 @@ interface BlogInput {
   published?: boolean
 }
 
+// In-memory cache for the blog list page (meta + tags), so navigation from
+// anywhere in the app (especially after a background prefetch) is instant.
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+interface CacheEntry<T> {
+  data: T
+  expires: number
+}
+
 class BlogService {
+  private metaCache: CacheEntry<{ success: boolean; blogs: BlogMeta[] }> | null = null
+  private tagsCache: CacheEntry<{ success: boolean; tags: Tag[] }> | null = null
+  // In-flight requests, so concurrent callers share one network trip
+  private metaInFlight: Promise<{ success: boolean; blogs: BlogMeta[] }> | null = null
+  private tagsInFlight: Promise<{ success: boolean; tags: Tag[] }> | null = null
+
+  private isFresh<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
+    return entry !== null && entry.expires > Date.now()
+  }
+
+  /**
+   * Warm the blog-list cache in the background (e.g. after the home page loads).
+   * Safe to call repeatedly — it no-ops while data is fresh or a fetch is in flight.
+   */
+  prefetchBlogList(): void {
+    void this.getBlogsMeta()
+    void this.getTags()
+  }
+
+  /** Drop cached data after mutations so the next read is fresh. */
+  invalidateBlogListCache(): void {
+    this.metaCache = null
+    this.tagsCache = null
+  }
+
   // ==================== PUBLIC ====================
 
   async getPublishedBlogs(
@@ -118,8 +152,23 @@ class BlogService {
   }
 
   async getBlogsMeta(): Promise<{ success: boolean; blogs: BlogMeta[] }> {
-    const res = await fetch(`${API_URL}/api/blogs/meta`)
-    return res.json()
+    if (this.isFresh(this.metaCache)) return this.metaCache.data
+    if (this.metaInFlight) return this.metaInFlight
+
+    this.metaInFlight = (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/blogs/meta`)
+        const data = await res.json()
+        if (data.success) {
+          this.metaCache = { data, expires: Date.now() + CACHE_TTL }
+        }
+        return data
+      } finally {
+        this.metaInFlight = null
+      }
+    })()
+
+    return this.metaInFlight
   }
 
   async searchBlogs(
@@ -220,6 +269,7 @@ class BlogService {
       headers: authService.getAuthHeaders(),
       body: JSON.stringify(data)
     })
+    this.invalidateBlogListCache()
     return res.json()
   }
 
@@ -229,6 +279,7 @@ class BlogService {
       headers: authService.getAuthHeaders(),
       body: JSON.stringify(data)
     })
+    this.invalidateBlogListCache()
     return res.json()
   }
 
@@ -237,6 +288,7 @@ class BlogService {
       method: 'DELETE',
       headers: authService.getAuthHeaders()
     })
+    this.invalidateBlogListCache()
     return res.json()
   }
 
@@ -260,8 +312,23 @@ class BlogService {
   // ==================== TAGS ====================
 
   async getTags(): Promise<{ success: boolean; tags: Tag[] }> {
-    const res = await fetch(`${API_URL}/api/tags`)
-    return res.json()
+    if (this.isFresh(this.tagsCache)) return this.tagsCache.data
+    if (this.tagsInFlight) return this.tagsInFlight
+
+    this.tagsInFlight = (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/tags`)
+        const data = await res.json()
+        if (data.success) {
+          this.tagsCache = { data, expires: Date.now() + CACHE_TTL }
+        }
+        return data
+      } finally {
+        this.tagsInFlight = null
+      }
+    })()
+
+    return this.tagsInFlight
   }
 
   async createTag(
@@ -273,6 +340,7 @@ class BlogService {
       headers: authService.getAuthHeaders(),
       body: JSON.stringify({ name, color })
     })
+    this.invalidateBlogListCache()
     return res.json()
   }
 
@@ -285,6 +353,7 @@ class BlogService {
       headers: authService.getAuthHeaders(),
       body: JSON.stringify(data)
     })
+    this.invalidateBlogListCache()
     return res.json()
   }
 
@@ -293,6 +362,7 @@ class BlogService {
       method: 'DELETE',
       headers: authService.getAuthHeaders()
     })
+    this.invalidateBlogListCache()
     return res.json()
   }
 }
